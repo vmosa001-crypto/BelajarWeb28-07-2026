@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Detail Produk — SULAM</title>
+  <title>Detail Produk — Agas Collection</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
@@ -14,7 +14,7 @@
 <header>
   <div class="container">
     <div class="header-inner">
-      <a href="/" class="logo">SU<span>LAM</span></a>
+      <a href="/" class="logo">Agas<span>Collection</span></a>
       <nav>
         <a href="/">Beranda</a>
         <a href="/products.html">Koleksi</a>
@@ -47,7 +47,7 @@
 </main>
 
 <footer style="background:var(--text);color:#888;text-align:center;padding:24px">
-  <p style="font-size:.85rem">© 2026 SULAM — <a href="/" style="color:var(--accent)">Beranda</a></p>
+  <p style="font-size:.85rem">© 2026 Agas Collection — <a href="/" style="color:var(--accent)">Beranda</a></p>
 </footer>
 
 <script type="module">
@@ -62,7 +62,7 @@ async function loadProduct() {
   const container = document.getElementById('product-detail');
   try {
     const p = await apiFetch(`/api/products/${id}`);
-    document.title = `${p.name} — SULAM`;
+    document.title = `${p.name} — Agas Collection`;
     document.getElementById('bc-name').textContent = p.name;
 
     // Color swatches — map nama warna ke hex sederhana
