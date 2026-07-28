@@ -1,0 +1,15 @@
+{
+  "name": "sulam-store",
+  "version": "1.0.0",
+  "description": "Toko pakaian profesional dengan Google Sheets sebagai database",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "googleapis": "^140.0.0"
+  }
+}

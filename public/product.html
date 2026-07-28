@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Produk — SULAM</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+
+<div class="promo-banner">Gratis ongkir untuk pembelian di atas <span>Rp 500.000</span> 🎉</div>
+
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <a href="/" class="logo">SU<span>LAM</span></a>
+      <nav>
+        <a href="/">Beranda</a>
+        <a href="/products.html">Koleksi</a>
+      </nav>
+      <div class="header-actions">
+        <a href="/cart.html" class="btn-cart">🛍 Keranjang <span class="cart-count">0</span></a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <p class="breadcrumb" style="padding:24px 0 0">
+      <a href="/">Beranda</a> <span>/</span>
+      <a href="/products.html">Koleksi</a> <span>/</span>
+      <span id="bc-name">Produk</span>
+    </p>
+
+    <div class="product-detail" id="product-detail">
+      <!-- diisi JS -->
+      <div class="skeleton" style="aspect-ratio:3/4;border-radius:12px"></div>
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <div class="skeleton" style="height:40px;border-radius:8px"></div>
+        <div class="skeleton" style="height:80px;border-radius:8px"></div>
+        <div class="skeleton" style="height:120px;border-radius:8px"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer style="background:var(--text);color:#888;text-align:center;padding:24px">
+  <p style="font-size:.85rem">© 2026 SULAM — <a href="/" style="color:var(--accent)">Beranda</a></p>
+</footer>
+
+<script type="module">
+import { Cart, fmt, toast, apiFetch } from '/js/main.js';
+
+const id = new URLSearchParams(location.search).get('id');
+if (!id) location.href = '/products.html';
+
+let selectedSize = '', selectedColor = '', qty = 1;
+
+async function loadProduct() {
+  const container = document.getElementById('product-detail');
+  try {
+    const p = await apiFetch(`/api/products/${id}`);
+    document.title = `${p.name} — SULAM`;
+    document.getElementById('bc-name').textContent = p.name;
+
+    // Color swatches — map nama warna ke hex sederhana
+    const colorMap = { 'Hitam':'#1a1a1a','Putih':'#f5f5f5','Biru Navy':'#1B3A6B','Merah Marun':'#7B1B2A','Abu-abu':'#888','Krem':'#F5E6C8','Olive':'#6B7C45','Camel':'#C19A6B','Cokelat':'#7B4F2E','Champagne':'#EDD9A3','Biru Indigo':'#2D3A8C','Sage Green':'#87A878','Dusty Pink':'#D4A5A5','Dusty Rose':'#C78B8B' };
+
+    container.innerHTML = `
+      <div class="product-detail-img">
+        <img src="${p.image}" alt="${p.name}">
+      </div>
+      <div class="product-detail-info">
+        <div>
+          <p class="product-category">${p.category}</p>
+          <h1 style="font-size:2rem;margin-bottom:12px">${p.name}</h1>
+          <p class="product-detail-price">${fmt(p.price)}</p>
+        </div>
+        <p class="product-detail-desc">${p.description}</p>
+
+        <div>
+          <p class="selector-label">Ukuran</p>
+          <div class="size-options">
+            ${p.sizes.map(s => `<button class="size-btn" data-size="${s}">${s}</button>`).join('')}
+          </div>
+        </div>
+
+        <div>
+          <p class="selector-label">Warna</p>
+          <div class="color-options">
+            ${p.colors.map(c => `<button class="color-btn" data-color="${c}" title="${c}" style="background:${colorMap[c]||'#ccc'}"></button>`).join('')}
+          </div>
+          <p id="selected-color" style="font-size:.85rem;color:var(--text-muted);margin-top:8px">&nbsp;</p>
+        </div>
+
+        <div>
+          <p class="selector-label">Jumlah</p>
+          <div class="qty-control">
+            <button class="qty-btn" id="qty-dec">−</button>
+            <span class="qty-val" id="qty-val">1</span>
+            <button class="qty-btn" id="qty-inc">+</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:8px">
+          <button class="btn btn-primary btn-lg" id="add-cart" style="flex:1">Tambah ke Keranjang</button>
+          <a href="/cart.html" class="btn btn-accent btn-lg" style="flex:1">Beli Sekarang</a>
+        </div>
+
+        <div style="background:var(--bg2);border-radius:12px;padding:16px;font-size:.85rem;color:var(--text-muted)">
+          <p>✅ Stok tersedia: <strong style="color:var(--text)">${p.stock} pcs</strong></p>
+          <p style="margin-top:6px">📦 Estimasi pengiriman 2–4 hari kerja</p>
+        </div>
+      </div>
+    `;
+
+    // Size selection
+    container.querySelectorAll('.size-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        container.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedSize = btn.dataset.size;
+      });
+    });
+
+    // Color selection
+    container.querySelectorAll('.color-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        container.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedColor = btn.dataset.color;
+        document.getElementById('selected-color').textContent = `Dipilih: ${selectedColor}`;
+      });
+    });
+
+    // Qty control
+    document.getElementById('qty-dec').addEventListener('click', () => {
+      if (qty > 1) { qty--; document.getElementById('qty-val').textContent = qty; }
+    });
+    document.getElementById('qty-inc').addEventListener('click', () => {
+      if (qty < p.stock) { qty++; document.getElementById('qty-val').textContent = qty; }
+    });
+
+    // Add to cart
+    document.getElementById('add-cart').addEventListener('click', () => {
+      if (!selectedSize) return toast('Pilih ukuran terlebih dahulu', 'error');
+      if (!selectedColor) return toast('Pilih warna terlebih dahulu', 'error');
+      Cart.add(p, selectedSize, selectedColor, qty);
+      toast(`${p.name} ditambahkan ke keranjang ✓`, 'success');
+    });
+
+  } catch {
+    container.innerHTML = '<p style="color:var(--text-muted);padding:40px">Produk tidak ditemukan.</p>';
+  }
+}
+
+loadProduct();
+</script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Koleksi — SULAM</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+
+<div class="promo-banner">Gratis ongkir untuk pembelian di atas <span>Rp 500.000</span> 🎉</div>
+
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <a href="/" class="logo">SU<span>LAM</span></a>
+      <nav>
+        <a href="/">Beranda</a>
+        <a href="/products.html">Koleksi</a>
+      </nav>
+      <div class="header-actions">
+        <a href="/cart.html" class="btn-cart">🛍 Keranjang <span class="cart-count">0</span></a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="page-title">
+      <p class="breadcrumb"><a href="/">Beranda</a> <span>/</span> Koleksi</p>
+      <h1>Semua Koleksi</h1>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" data-cat="">Semua</button>
+      <button class="filter-btn" data-cat="Atasan">Atasan</button>
+      <button class="filter-btn" data-cat="Bawahan">Bawahan</button>
+      <button class="filter-btn" data-cat="Dress">Dress</button>
+      <button class="filter-btn" data-cat="Outer">Outer</button>
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Cari produk...">
+        <button id="search-btn">🔍</button>
+      </div>
+    </div>
+
+    <div class="grid-4" id="product-grid">
+      <div class="skeleton" style="height:380px;border-radius:12px"></div>
+      <div class="skeleton" style="height:380px;border-radius:12px"></div>
+      <div class="skeleton" style="height:380px;border-radius:12px"></div>
+      <div class="skeleton" style="height:380px;border-radius:12px"></div>
+    </div>
+  </div>
+</main>
+
+<footer style="background:var(--text);color:#888;text-align:center;padding:24px">
+  <p style="font-size:.85rem">© 2026 SULAM — <a href="/" style="color:var(--accent)">Beranda</a></p>
+</footer>
+
+<script type="module">
+import { fmt, apiFetch } from '/js/main.js';
+
+let activeCategory = new URLSearchParams(location.search).get('category') || '';
+let activeSearch = '';
+
+function renderCard(p) {
+  return `
+    <a href="/product.html?id=${p.id}" class="product-card">
+      <div class="product-card-img">
+        <img src="${p.image}" alt="${p.name}" loading="lazy">
+        ${p.featured ? '<span class="product-badge">Unggulan</span>' : ''}
+      </div>
+      <div class="product-card-body">
+        <p class="product-category">${p.category}</p>
+        <p class="product-name">${p.name}</p>
+        <p class="product-price">${fmt(p.price)}</p>
+      </div>
+      <div class="product-card-footer">
+        <button class="btn btn-outline btn-sm btn-block">Lihat Detail</button>
+      </div>
+    </a>`;
+}
+
+async function loadProducts() {
+  const grid = document.getElementById('product-grid');
+  let url = '/api/products?';
+  if (activeCategory) url += `category=${encodeURIComponent(activeCategory)}&`;
+  if (activeSearch) url += `search=${encodeURIComponent(activeSearch)}&`;
+  try {
+    const products = await apiFetch(url);
+    grid.innerHTML = products.length
+      ? products.map(renderCard).join('')
+      : '<p style="color:var(--text-muted);padding:40px 0">Tidak ada produk ditemukan.</p>';
+  } catch {
+    grid.innerHTML = '<p style="color:var(--text-muted)">Gagal memuat produk.</p>';
+  }
+}
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  if (btn.dataset.cat === activeCategory) btn.classList.add('active');
+  else if (activeCategory) btn.classList.remove('active');
+
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeCategory = btn.dataset.cat;
+    loadProducts();
+  });
+});
+
+// Search
+document.getElementById('search-btn').addEventListener('click', () => {
+  activeSearch = document.getElementById('search-input').value.trim();
+  loadProducts();
+});
+document.getElementById('search-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { activeSearch = e.target.value.trim(); loadProducts(); }
+});
+
+loadProducts();
+</script>
+</body>
+</html>
