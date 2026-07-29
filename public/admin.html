@@ -202,12 +202,91 @@
     .loading { text-align:center; padding:36px; color:var(--muted); font-size:.875rem; }
     .empty   { text-align:center; padding:28px; color:var(--muted); font-size:.83rem; }
     .page-title { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; margin-bottom:18px; }
+
+    /* ─── Mobile hamburger button ─── */
+    .mob-menu { display:none; width:36px; height:36px; border-radius:8px; border:1px solid var(--border); background:var(--card); align-items:center; justify-content:center; color:var(--text); flex-shrink:0; }
+    .mob-menu svg { width:18px; height:18px; }
+
+    /* ─── Sidebar overlay backdrop ─── */
+    .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:199; }
+    .sidebar-overlay.open { display:block; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 768px) {
+      body { overflow:hidden; }
+
+      /* Sidebar: slide-in drawer on mobile */
+      .sidebar {
+        position:fixed; left:0; top:0; bottom:0; z-index:200;
+        transform:translateX(-100%);
+        transition:transform .25s ease, background .25s, border-color .25s;
+        width:240px;
+        box-shadow: 4px 0 24px rgba(0,0,0,.18);
+      }
+      .sidebar.open { transform:translateX(0); }
+
+      /* Main takes full width */
+      .main { width:100%; }
+
+      /* Topbar: compact */
+      .topbar { padding:11px 14px; gap:8px; }
+      .topbar-title h2 { font-size:1.05rem; }
+      .topbar-title p { font-size:.68rem; }
+      .search-box { display:none; }
+
+      /* Show hamburger */
+      .mob-menu { display:flex; }
+
+      /* Content padding */
+      .content { padding:14px 12px; }
+
+      /* Stats: 2 columns on mobile */
+      .stats-grid { grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px; }
+      .stat-card { padding:14px; }
+      .stat-value { font-size:1.2rem; }
+
+      /* Main grid: single column */
+      .main-grid { grid-template-columns:1fr; gap:12px; margin-bottom:12px; }
+
+      /* Bottom grid: single column */
+      .bottom-grid { grid-template-columns:1fr; gap:12px; }
+
+      /* Report grid: single column */
+      .report-grid { grid-template-columns:1fr; gap:12px; }
+
+      /* Card head: wrap actions */
+      .card-head { flex-wrap:wrap; gap:8px; padding:12px 14px; }
+      .card-body { padding:14px; }
+      .tbl-actions { width:100%; }
+      .tbl-actions .search-box { display:flex; width:100%; }
+      .tbl-actions .search-box input { width:100%; }
+
+      /* Table font */
+      th { font-size:.62rem; padding:8px 10px; }
+      td { font-size:.78rem; padding:9px 10px; }
+
+      /* Settings: stack rows */
+      .setting-row { flex-direction:column; align-items:flex-start; gap:10px; }
+      .inp { width:100%; }
+
+      /* Sidebar user */
+      .sidebar-user { padding:10px; }
+    }
+
+    @media (max-width: 400px) {
+      .stats-grid { grid-template-columns:1fr 1fr; gap:8px; }
+      .stat-value { font-size:1.05rem; }
+      .stat-label { font-size:.68rem; }
+    }
   </style>
 </head>
 <body>
 
+<!-- Mobile sidebar overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
 <!-- ═══════════════ SIDEBAR ═══════════════ -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <h1>Agas Collection</h1>
     <small>Lombok</small>
@@ -247,9 +326,14 @@
 <!-- ═══════════════ MAIN ═══════════════ -->
 <div class="main">
   <header class="topbar">
-    <div class="topbar-title">
-      <h2 id="page-heading">Dashboard</h2>
-      <p id="date-display"></p>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="mob-menu" id="mob-menu-btn" onclick="openSidebar()" title="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="topbar-title">
+        <h2 id="page-heading">Dashboard</h2>
+        <p id="date-display"></p>
+      </div>
     </div>
     <div class="topbar-right">
       <div class="search-box">
@@ -542,6 +626,16 @@ if (localStorage.getItem('admin-theme') === 'dark') {
 }
 syncToggle();
 
+// ── Mobile sidebar ──
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
 // ── Tab navigation ──
 const TAB_TITLES = {dashboard:'Dashboard',produk:'Produk',pesanan:'Pesanan',pelanggan:'Pelanggan',laporan:'Laporan',pengaturan:'Pengaturan'};
 function goTab(name) {
@@ -550,6 +644,7 @@ function goTab(name) {
   document.getElementById('page-heading').textContent = TAB_TITLES[name] || name;
   if (name === 'laporan') renderLaporan();
   if (name === 'pengaturan') checkSheets();
+  closeSidebar(); // close drawer on mobile after navigation
 }
 document.getElementById('sidebar-nav').addEventListener('click', e => {
   const btn = e.target.closest('[data-tab]');
