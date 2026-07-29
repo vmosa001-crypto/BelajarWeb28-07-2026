@@ -1,12 +1,25 @@
-# Project
+# SULAM Store — Agas Collection
 
-This project uses [Ponytail](https://github.com/DietrichGebert/ponytail) — a lazy senior dev ruleset for AI agents.
+Toko pakaian premium Indonesia. Express + Node.js backend, static HTML/CSS/JS frontend, Google Sheets sebagai database produk & pesanan.
 
-## How it works
+## How to run
 
-`AGENTS.md` at the project root injects the Ponytail coding ladder into every AI agent session automatically. The rule: stop at the first rung that holds (YAGNI → reuse → stdlib → native → installed dep → one line → minimum that works).
+```
+npm install
+node server.js   # or: npm start
+```
 
-**Result:** ~54% less generated code on average, ~20% cheaper token cost, ~27% faster.
+Runs on port 5000. Requires secrets: `GOOGLE_SPREADSHEET_ID` and `GOOGLE_SERVICE_ACCOUNT_JSON`. Falls back to mock data if Sheets is not configured.
+
+## Stack
+
+- **Backend**: Express (`server.js`), Google Sheets via `googleapis` (`lib/sheets.js`)
+- **Frontend**: Static files in `public/` (index, products, product, cart, checkout)
+- **Database**: Google Sheets — sheet `Produk!A2:K` for products, `Pesanan!A:J` for orders
+
+## Ponytail coding rules
+
+`AGENTS.md` at the project root injects the Ponytail ladder: YAGNI → reuse → stdlib → native → installed dep → one line → minimum that works.
 
 ## User preferences
 
