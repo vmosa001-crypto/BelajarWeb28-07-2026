@@ -219,23 +219,26 @@
     .status-pill.selected { box-shadow:0 0 0 2px currentColor; transform:scale(1.05); }
     .status-pill:hover:not(.selected) { opacity:.8; }
 
-    /* ─── Edit Modal ─── */
-    .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:300; align-items:center; justify-content:center; padding:16px; }
+    /* ─── Edit / Add Modal ─── */
+    .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:300; align-items:center; justify-content:center; padding:16px; overflow-y:auto; }
     .modal-backdrop.open { display:flex; }
-    .modal { background:var(--card); border:1px solid var(--card-border); border-radius:18px; box-shadow:var(--shadow-lg); width:100%; max-width:480px; overflow:hidden; animation:modalIn .2s ease; }
+    .modal { background:var(--card); border:1px solid var(--card-border); border-radius:18px; box-shadow:var(--shadow-lg); width:100%; max-width:480px; overflow:hidden; animation:modalIn .2s ease; margin:auto; }
     @keyframes modalIn { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
     .modal-head { padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
     .modal-head h3 { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; }
     .modal-close { width:30px; height:30px; border-radius:7px; border:1px solid var(--border); background:var(--bg3); display:flex; align-items:center; justify-content:center; color:var(--muted); transition:all .15s; }
     .modal-close:hover { color:var(--text); border-color:var(--accent); }
     .modal-close svg { width:14px; height:14px; }
-    .modal-body { padding:20px 24px; display:flex; flex-direction:column; gap:14px; }
+    .modal-body { padding:20px 24px; display:flex; flex-direction:column; gap:14px; max-height:70vh; overflow-y:auto; }
     .form-field { display:flex; flex-direction:column; gap:5px; }
     .form-field label { font-size:.75rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
-    .form-field input, .form-field select { padding:9px 12px; border:1px solid var(--border); border-radius:9px; font-size:.875rem; background:var(--input-bg); color:var(--text); outline:none; transition:border-color .18s; font-family:inherit; width:100%; }
-    .form-field input:focus, .form-field select:focus { border-color:var(--accent); }
-    .img-preview { width:100%; height:120px; border-radius:10px; overflow:hidden; border:1px solid var(--border); background:var(--bg3); margin-top:6px; }
-    .img-preview img { width:100%; height:100%; object-fit:cover; display:block; }
+    .form-field input, .form-field select, .form-field textarea { padding:9px 12px; border:1px solid var(--border); border-radius:9px; font-size:.875rem; background:var(--input-bg); color:var(--text); outline:none; transition:border-color .18s; font-family:inherit; width:100%; }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color:var(--accent); }
+    .form-field textarea { resize:vertical; min-height:70px; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .img-preview { width:100%; height:120px; border-radius:10px; overflow:hidden; border:1px solid var(--border); background:var(--bg3); margin-top:6px; display:flex; align-items:center; justify-content:center; }
+    .img-preview img { width:100%; height:100%; object-fit:cover; display:none; }
+    .img-preview-placeholder { font-size:.75rem; color:var(--muted); }
     .modal-foot { padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
     .btn-ghost { padding:8px 18px; border:1px solid var(--border); border-radius:9px; font-size:.855rem; font-weight:600; color:var(--text2); background:var(--bg3); transition:all .17s; }
     .btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
@@ -244,6 +247,28 @@
     .btn-save svg { width:14px; height:14px; }
     .btn-edit { padding:5px 11px; border-radius:7px; font-size:.75rem; font-weight:600; border:1px solid var(--border); background:var(--bg3); color:var(--text2); transition:all .15s; white-space:nowrap; }
     .btn-edit:hover { border-color:var(--accent); color:var(--accent); background:var(--active-bg); }
+
+    /* ─── Upload Zone ─── */
+    .upload-zone { border:2px dashed var(--border); border-radius:10px; padding:14px 16px; text-align:center; cursor:pointer; transition:border-color .18s,background .18s; margin-top:6px; position:relative; }
+    .upload-zone:hover, .upload-zone.drag-over { border-color:var(--accent); background:var(--bg3); }
+    .upload-zone input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+    .upload-zone-inner { display:flex; flex-direction:column; align-items:center; gap:4px; pointer-events:none; }
+    .upload-zone-inner svg { width:22px; height:22px; color:var(--muted); }
+    .upload-zone-inner span { font-size:.78rem; color:var(--muted); }
+    .upload-zone-inner strong { font-size:.78rem; color:var(--accent); font-weight:600; }
+    .upload-progress { display:none; font-size:.75rem; color:var(--accent); font-weight:600; margin-top:6px; text-align:center; }
+
+    /* ─── Sizes checkbox group ─── */
+    .size-checks { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+    .size-check { position:relative; }
+    .size-check input { position:absolute; opacity:0; width:0; height:0; }
+    .size-check label { display:block; padding:4px 12px; border-radius:7px; font-size:.75rem; font-weight:600; border:1px solid var(--border); background:var(--bg3); color:var(--text2); cursor:pointer; transition:all .15s; user-select:none; }
+    .size-check input:checked + label { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+    /* ─── Toggle (featured) ─── */
+    .featured-toggle { display:flex; align-items:center; gap:10px; margin-top:4px; }
+    .featured-toggle .toggle-sw { flex-shrink:0; }
+    .featured-toggle span { font-size:.83rem; color:var(--text2); }
 
     /* ─── Toast ─── */
     .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(60px); background:var(--text); color:var(--bg); padding:10px 22px; border-radius:10px; font-size:.855rem; font-weight:500; z-index:400; transition:transform .25s ease, opacity .25s; opacity:0; pointer-events:none; white-space:nowrap; }
@@ -260,63 +285,32 @@
     /* ─── Responsive ─── */
     @media (max-width: 768px) {
       body { overflow:hidden; }
-
-      /* Sidebar: slide-in drawer on mobile */
-      .sidebar {
-        position:fixed; left:0; top:0; bottom:0; z-index:200;
-        transform:translateX(-100%);
-        transition:transform .25s ease, background .25s, border-color .25s;
-        width:240px;
-        box-shadow: 4px 0 24px rgba(0,0,0,.18);
-      }
+      .sidebar { position:fixed; left:0; top:0; bottom:0; z-index:200; transform:translateX(-100%); transition:transform .25s ease, background .25s, border-color .25s; width:240px; box-shadow: 4px 0 24px rgba(0,0,0,.18); }
       .sidebar.open { transform:translateX(0); }
-
-      /* Main takes full width */
       .main { width:100%; }
-
-      /* Topbar: compact */
       .topbar { padding:11px 14px; gap:8px; }
       .topbar-title h2 { font-size:1.05rem; }
       .topbar-title p { font-size:.68rem; }
       .search-box { display:none; }
-
-      /* Show hamburger */
       .mob-menu { display:flex; }
-
-      /* Content padding */
       .content { padding:14px 12px; }
-
-      /* Stats: 2 columns on mobile */
       .stats-grid { grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px; }
       .stat-card { padding:14px; }
       .stat-value { font-size:1.2rem; }
-
-      /* Main grid: single column */
       .main-grid { grid-template-columns:1fr; gap:12px; margin-bottom:12px; }
-
-      /* Bottom grid: single column */
       .bottom-grid { grid-template-columns:1fr; gap:12px; }
-
-      /* Report grid: single column */
       .report-grid { grid-template-columns:1fr; gap:12px; }
-
-      /* Card head: wrap actions */
       .card-head { flex-wrap:wrap; gap:8px; padding:12px 14px; }
       .card-body { padding:14px; }
       .tbl-actions { width:100%; }
       .tbl-actions .search-box { display:flex; width:100%; }
       .tbl-actions .search-box input { width:100%; }
-
-      /* Table font */
       th { font-size:.62rem; padding:8px 10px; }
       td { font-size:.78rem; padding:9px 10px; }
-
-      /* Settings: stack rows */
       .setting-row { flex-direction:column; align-items:flex-start; gap:10px; }
       .inp { width:100%; }
-
-      /* Sidebar user */
       .sidebar-user { padding:10px; }
+      .form-row { grid-template-columns:1fr; }
     }
 
     @media (max-width: 400px) {
@@ -327,6 +321,93 @@
   </style>
 </head>
 <body>
+
+<!-- ═══════════════ TAMBAH PRODUK MODAL ═══════════════ -->
+<div class="modal-backdrop" id="add-modal" onclick="handleAddBackdropClick(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Tambah Produk Baru</h3>
+      <button class="modal-close" onclick="closeAddModal()" title="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Nama Produk *</label>
+          <input type="text" id="add-name" placeholder="Nama produk…">
+        </div>
+        <div class="form-field">
+          <label>Kategori *</label>
+          <select id="add-category">
+            <option value="Atasan">Atasan</option>
+            <option value="Bawahan">Bawahan</option>
+            <option value="Outer">Outer</option>
+            <option value="Dress">Dress</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Deskripsi</label>
+        <textarea id="add-description" placeholder="Deskripsi singkat produk…"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Harga (Rp) *</label>
+          <input type="number" id="add-price" min="0" step="1000" placeholder="0">
+        </div>
+        <div class="form-field">
+          <label>Jumlah Stok *</label>
+          <input type="number" id="add-stock" min="0" placeholder="0">
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Ukuran Tersedia</label>
+        <div class="size-checks">
+          <div class="size-check"><input type="checkbox" id="add-s-S" value="S"><label for="add-s-S">S</label></div>
+          <div class="size-check"><input type="checkbox" id="add-s-M" value="M" checked><label for="add-s-M">M</label></div>
+          <div class="size-check"><input type="checkbox" id="add-s-L" value="L" checked><label for="add-s-L">L</label></div>
+          <div class="size-check"><input type="checkbox" id="add-s-XL" value="XL"><label for="add-s-XL">XL</label></div>
+          <div class="size-check"><input type="checkbox" id="add-s-XXL" value="XXL"><label for="add-s-XXL">XXL</label></div>
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Produk Unggulan</label>
+        <div class="featured-toggle">
+          <div class="toggle-sw off" id="add-featured-toggle" onclick="toggleFeatured('add')"></div>
+          <span id="add-featured-label">Tidak unggulan</span>
+        </div>
+        <input type="hidden" id="add-featured" value="false">
+      </div>
+      <div class="form-field">
+        <label>Gambar Produk</label>
+        <!-- Upload file -->
+        <div class="upload-zone" id="add-upload-zone">
+          <input type="file" id="add-file-input" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleFileInput(event,'add-img-preview','add-image')">
+          <div class="upload-zone-inner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span><strong>Klik untuk upload</strong> atau drag & drop</span>
+            <span>JPG, PNG, WebP maks 5 MB</span>
+          </div>
+        </div>
+        <div class="upload-progress" id="add-upload-progress">Mengupload gambar…</div>
+        <!-- Atau isi URL langsung -->
+        <input type="url" id="add-image" placeholder="Atau masukkan URL gambar langsung…" style="margin-top:8px" oninput="previewImgById(this.value,'add-img-preview')">
+        <div class="img-preview" id="add-img-preview-box">
+          <img id="add-img-preview" src="" alt="Preview gambar" onerror="this.style.display='none'" onload="this.style.display='block'">
+          <span class="img-preview-placeholder" id="add-img-placeholder">Preview gambar</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeAddModal()">Batal</button>
+      <button class="btn-save" id="btn-save-add" onclick="saveNewProduct()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Tambah Produk
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════ EDIT PRODUCT MODAL ═══════════════ -->
 <div class="modal-backdrop" id="edit-modal" onclick="handleBackdropClick(event)">
@@ -343,24 +424,38 @@
         <label>Nama Produk</label>
         <input type="text" id="edit-name" placeholder="Nama produk…">
       </div>
-      <div class="form-field">
-        <label>Kategori</label>
-        <select id="edit-category">
-          <option value="Atasan">Atasan</option>
-          <option value="Bawahan">Bawahan</option>
-          <option value="Outer">Outer</option>
-          <option value="Dress">Dress</option>
-        </select>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Kategori</label>
+          <select id="edit-category">
+            <option value="Atasan">Atasan</option>
+            <option value="Bawahan">Bawahan</option>
+            <option value="Outer">Outer</option>
+            <option value="Dress">Dress</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Jumlah Stok</label>
+          <input type="number" id="edit-stock" min="0" placeholder="0">
+        </div>
       </div>
       <div class="form-field">
-        <label>Jumlah Stok</label>
-        <input type="number" id="edit-stock" min="0" placeholder="0">
-      </div>
-      <div class="form-field">
-        <label>URL Gambar</label>
-        <input type="url" id="edit-image" placeholder="https://…" oninput="previewImg(this.value)">
+        <label>Gambar Produk</label>
+        <!-- Upload file -->
+        <div class="upload-zone" id="edit-upload-zone">
+          <input type="file" id="edit-file-input" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleFileInput(event,'edit-img-preview','edit-image')">
+          <div class="upload-zone-inner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span><strong>Klik untuk ganti gambar</strong> atau drag & drop</span>
+            <span>JPG, PNG, WebP maks 5 MB</span>
+          </div>
+        </div>
+        <div class="upload-progress" id="edit-upload-progress">Mengupload gambar…</div>
+        <!-- Atau URL langsung -->
+        <input type="url" id="edit-image" placeholder="Atau masukkan URL gambar langsung…" style="margin-top:8px" oninput="previewImgById(this.value,'edit-img-preview')">
         <div class="img-preview" id="img-preview-box">
-          <img id="img-preview" src="" alt="Preview gambar" onerror="this.style.display='none'" onload="this.style.display='block'">
+          <img id="edit-img-preview" src="" alt="Preview gambar" onerror="this.style.display='none'" onload="this.style.display='block'">
+          <span class="img-preview-placeholder" id="edit-img-placeholder">Preview gambar</span>
         </div>
       </div>
     </div>
@@ -432,13 +527,13 @@
       <div class="form-field">
         <label>Status Pesanan</label>
         <div class="status-pills">
-          <button class="status-pill sp-pending"  data-status="Pending"  onclick="selectStatus('Pending')">⏳ Pending</button>
-          <button class="status-pill sp-diproses" data-status="Diproses" onclick="selectStatus('Diproses')">🔄 Diproses</button>
-          <button class="status-pill sp-selesai"  data-status="Selesai"  onclick="selectStatus('Selesai')">✓ Selesai</button>
+          <button type="button" class="status-pill sp-pending"  data-status="Pending"  onclick="selectStatus('Pending')">⏳ Pending</button>
+          <button type="button" class="status-pill sp-diproses" data-status="Diproses" onclick="selectStatus('Diproses')">🔄 Diproses</button>
+          <button type="button" class="status-pill sp-selesai"  data-status="Selesai"  onclick="selectStatus('Selesai')">✓ Selesai</button>
         </div>
       </div>
 
-      <!-- Editable: Catatan / Deskripsi -->
+      <!-- Editable: Catatan -->
       <div class="form-field">
         <label>Catatan / Deskripsi Pesanan</label>
         <textarea id="od-notes" rows="3" placeholder="Tambahkan catatan internal untuk pesanan ini…"
@@ -448,7 +543,7 @@
     </div>
     <div class="modal-foot">
       <button class="btn-ghost" onclick="closeOrderModal()">Tutup</button>
-      <button class="btn-save" id="btn-save-order" onclick="saveOrder()">
+      <button type="button" class="btn-save" id="btn-save-order" onclick="saveOrder()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         Simpan Perubahan
       </button>
@@ -620,6 +715,11 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input type="text" placeholder="Cari produk…" id="produk-search">
             </div>
+            <!-- TOMBOL TAMBAH PRODUK BARU -->
+            <button class="btn-sm btn-accent" onclick="openAddModal()" style="display:flex;align-items:center;gap:6px;white-space:nowrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Tambah Produk
+            </button>
           </div>
         </div>
         <div class="tbl-wrap">
@@ -813,7 +913,7 @@ function goTab(name) {
   document.getElementById('page-heading').textContent = TAB_TITLES[name] || name;
   if (name === 'laporan') renderLaporan();
   if (name === 'pengaturan') checkSheets();
-  closeSidebar(); // close drawer on mobile after navigation
+  closeSidebar();
 }
 document.getElementById('sidebar-nav').addEventListener('click', e => {
   const btn = e.target.closest('[data-tab]');
@@ -822,15 +922,12 @@ document.getElementById('sidebar-nav').addEventListener('click', e => {
 
 // ── Load all data ──
 async function loadAll() {
-  const [prodRes, ordRes, statusRes] = await Promise.all([
+  const [prodRes, ordRes] = await Promise.all([
     fetch('/api/products').then(r=>r.json()).catch(()=>[]),
     fetch('/api/orders').then(r=>r.json()).catch(()=>[]),
-    fetch('/api/status').then(r=>r.json()).catch(()=>({sheetsConnected:false})),
   ]);
-
-  _products = prodRes.length ? prodRes : [];
-  _orders   = Array.isArray(ordRes) ? ordRes : [];
-
+  _products = Array.isArray(prodRes) ? prodRes : [];
+  _orders   = Array.isArray(ordRes)  ? ordRes  : [];
   renderStats();
   renderDashOrders();
   renderDashProducts();
@@ -842,7 +939,7 @@ async function loadAll() {
 
 // ── Stats ──
 function renderStats() {
-  const active = _products.filter(p=>p.stock>0).length;
+  const active  = _products.filter(p=>p.stock>0).length;
   const pending = _orders.filter(o=>o.status==='Pending').length;
   const revenue = _orders.filter(o=>o.status==='Selesai').reduce((s,o)=>s+Number(o.total),0);
   document.getElementById('s-orders').textContent   = _orders.length;
@@ -895,7 +992,7 @@ function renderProduk(filter='') {
     const stockCls = p.stock===0?'stock-out':p.stock<=5?'stock-low':'stock-ok';
     const sizes = p.sizes?.map(s=>`<span class="pill">${s}</span>`).join('')||'—';
     return `<tr>
-      <td><div style="font-weight:600">${p.name}</div><div style="font-size:.72rem;color:var(--muted)">${p.description?.slice(0,50)||''}…</div></td>
+      <td><div style="font-weight:600">${p.name}</div><div style="font-size:.72rem;color:var(--muted)">${(p.description||'').slice(0,50)}…</div></td>
       <td><span class="pill">${p.category}</span></td>
       <td class="cell-bold">${fmtRp(p.price)}</td>
       <td class="${stockCls}">${p.stock}</td>
@@ -929,7 +1026,6 @@ document.getElementById('pesanan-search').addEventListener('input', e => renderP
 // ── Pelanggan tab ──
 function renderPelanggan(filter='') {
   const q = filter.toLowerCase();
-  // Group orders by customer name
   const map = {};
   _orders.forEach(o => {
     const k = o.name||'Anonim';
@@ -982,7 +1078,7 @@ async function checkSheets() {
   b.className = 'badge ' + (sheetsConnected ? 'bg' : 'ba');
 }
 
-// ── Global search forwards to active tab ──
+// ── Global search ──
 document.getElementById('global-search').addEventListener('input', e => {
   const v = e.target.value;
   const active = document.querySelector('.section.active')?.id?.replace('tab-','');
@@ -991,30 +1087,191 @@ document.getElementById('global-search').addEventListener('input', e => {
   if (active==='pelanggan') { document.getElementById('pelanggan-search').value=v; renderPelanggan(v); }
 });
 
-// ── Order Detail Modal ──
+// ══════════════════════════════════════════════════════
+// ── IMAGE UPLOAD HELPER ──
+// ══════════════════════════════════════════════════════
+async function handleFileInput(event, previewImgId, urlInputId) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Tentukan prefix modal (add / edit)
+  const prefix = urlInputId.startsWith('add') ? 'add' : 'edit';
+  const progressEl = document.getElementById(prefix + '-upload-progress');
+
+  // Tampilkan progress
+  if (progressEl) { progressEl.style.display = 'block'; progressEl.textContent = 'Mengupload gambar…'; }
+
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({error:'Upload gagal'}));
+      throw new Error(err.error || 'Upload gagal');
+    }
+    const { url } = await res.json();
+
+    // Isi URL input dan tampilkan preview
+    document.getElementById(urlInputId).value = url;
+    previewImgById(url, previewImgId);
+
+    if (progressEl) { progressEl.textContent = '✓ Gambar berhasil diupload!'; }
+    setTimeout(() => { if (progressEl) progressEl.style.display = 'none'; }, 2500);
+  } catch (err) {
+    if (progressEl) { progressEl.textContent = '✗ ' + err.message; }
+    setTimeout(() => { if (progressEl) progressEl.style.display = 'none'; }, 3000);
+    showToast('Upload gagal: ' + err.message);
+  }
+}
+
+function previewImgById(url, imgId) {
+  const img = document.getElementById(imgId);
+  if (!img) return;
+  img.src = url;
+  if (url) {
+    img.style.display = 'block';
+    // sembunyikan placeholder
+    const placeholder = img.parentElement.querySelector('.img-preview-placeholder');
+    if (placeholder) placeholder.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    const placeholder = img.parentElement.querySelector('.img-preview-placeholder');
+    if (placeholder) placeholder.style.display = '';
+  }
+}
+
+// Backward compat untuk edit modal lama
+function previewImg(url) { previewImgById(url, 'edit-img-preview'); }
+
+// ══════════════════════════════════════════════════════
+// ── TOGGLE FEATURED ──
+// ══════════════════════════════════════════════════════
+function toggleFeatured(prefix) {
+  const hidden  = document.getElementById(prefix + '-featured');
+  const toggle  = document.getElementById(prefix + '-featured-toggle');
+  const label   = document.getElementById(prefix + '-featured-label');
+  const current = hidden.value === 'true';
+  hidden.value = current ? 'false' : 'true';
+  toggle.classList.toggle('off', current);
+  if (label) label.textContent = current ? 'Tidak unggulan' : 'Produk unggulan ★';
+}
+
+function setFeatured(prefix, val) {
+  const hidden = document.getElementById(prefix + '-featured');
+  const toggle = document.getElementById(prefix + '-featured-toggle');
+  const label  = document.getElementById(prefix + '-featured-label');
+  hidden.value = val ? 'true' : 'false';
+  toggle.classList.toggle('off', !val);
+  if (label) label.textContent = val ? 'Produk unggulan ★' : 'Tidak unggulan';
+}
+
+// ══════════════════════════════════════════════════════
+// ── ADD PRODUCT MODAL ──
+// ══════════════════════════════════════════════════════
+function openAddModal() {
+  // Reset form
+  document.getElementById('add-name').value        = '';
+  document.getElementById('add-description').value = '';
+  document.getElementById('add-price').value       = '';
+  document.getElementById('add-stock').value       = '';
+  document.getElementById('add-image').value       = '';
+  document.getElementById('add-file-input').value  = '';
+  // Reset size checks
+  ['S','M','L','XL','XXL'].forEach(s => {
+    const cb = document.getElementById('add-s-' + s);
+    if (cb) cb.checked = (s === 'M' || s === 'L');
+  });
+  // Reset featured
+  setFeatured('add', false);
+  // Reset preview
+  previewImgById('', 'add-img-preview');
+  document.getElementById('add-img-placeholder').style.display = '';
+  document.getElementById('add-upload-progress').style.display = 'none';
+  document.getElementById('add-modal').classList.add('open');
+  document.getElementById('add-name').focus();
+}
+
+function closeAddModal() {
+  document.getElementById('add-modal').classList.remove('open');
+}
+
+function handleAddBackdropClick(e) {
+  if (e.target === document.getElementById('add-modal')) closeAddModal();
+}
+
+async function saveNewProduct() {
+  const name        = document.getElementById('add-name').value.trim();
+  const category    = document.getElementById('add-category').value;
+  const description = document.getElementById('add-description').value.trim();
+  const price       = parseFloat(document.getElementById('add-price').value);
+  const stock       = parseInt(document.getElementById('add-stock').value, 10);
+  const image       = document.getElementById('add-image').value.trim();
+  const featured    = document.getElementById('add-featured').value === 'true';
+  const sizes       = ['S','M','L','XL','XXL'].filter(s => document.getElementById('add-s-'+s)?.checked);
+
+  if (!name)             { showToast('Nama produk tidak boleh kosong'); return; }
+  if (isNaN(price)||price<0) { showToast('Harga harus berupa angka ≥ 0'); return; }
+  if (isNaN(stock)||stock<0) { showToast('Stok harus berupa angka ≥ 0'); return; }
+
+  const btn = document.getElementById('btn-save-add');
+  btn.disabled = true;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke-dasharray="28" stroke-dashoffset="14"/></svg> Menyimpan…`;
+
+  try {
+    const res = await fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, category, description, price, stock, image, featured, sizes })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({error:'Gagal menyimpan'}));
+      throw new Error(err.error || 'Gagal menyimpan');
+    }
+    const newProduct = await res.json();
+    _products.unshift(newProduct);
+    // Re-render semua tampilan yang menampilkan produk
+    renderStats();
+    renderDashProducts();
+    renderDashLowstock();
+    renderProduk(document.getElementById('produk-search').value);
+    closeAddModal();
+    showToast('✓ Produk baru berhasil ditambahkan!');
+  } catch (e) {
+    showToast('Gagal: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Tambah Produk`;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// ── ORDER DETAIL MODAL ──
+// ══════════════════════════════════════════════════════
 let _selectedStatus = '';
 
 function openOrderModal(id) {
   const o = _orders.find(o => o.id === id);
-  if (!o) return;
-  _selectedStatus = o.status;
-  document.getElementById('order-modal-id').textContent      = o.id;
-  document.getElementById('order-modal-id-val').value        = o.id;
-  document.getElementById('od-name').textContent             = o.name    || '—';
-  document.getElementById('od-date').textContent             = fmtDate(o.date);
-  document.getElementById('od-email').textContent            = o.email   || '—';
-  document.getElementById('od-phone').textContent            = o.phone   || '—';
-  document.getElementById('od-city').textContent             = o.city    || '—';
-  document.getElementById('od-total').textContent            = fmtRp(o.total);
-  document.getElementById('od-items').textContent            = parseItems(o.items);
-  document.getElementById('od-notes').value                  = o.notes   || '';
-  // Address: combine address + city
+  if (!o) { showToast('Pesanan tidak ditemukan'); return; }
+
+  _selectedStatus = o.status || 'Pending';
+
+  document.getElementById('order-modal-id').textContent     = o.id;
+  document.getElementById('order-modal-id-val').value       = o.id;
+  document.getElementById('od-name').textContent            = o.name    || '—';
+  document.getElementById('od-date').textContent            = fmtDate(o.date);
+  document.getElementById('od-email').textContent           = o.email   || '—';
+  document.getElementById('od-phone').textContent           = o.phone   || '—';
+  document.getElementById('od-city').textContent            = o.city    || '—';
+  document.getElementById('od-total').textContent           = fmtRp(o.total);
+  document.getElementById('od-items').textContent           = parseItems(o.items);
+  document.getElementById('od-notes').value                 = o.notes   || '';
+
   const addr = [o.address, o.city].filter(Boolean).join(', ');
-  document.getElementById('od-address').textContent          = addr || '—';
-  // Status pills
-  selectStatus(o.status);
+  document.getElementById('od-address').textContent         = addr || '—';
+
+  selectStatus(_selectedStatus);
   document.getElementById('order-modal').classList.add('open');
-  document.getElementById('od-notes').focus();
 }
 
 function closeOrderModal() {
@@ -1037,29 +1294,37 @@ async function saveOrder() {
   const status = _selectedStatus;
   const notes  = document.getElementById('od-notes').value.trim();
 
+  if (!id)     { showToast('ID pesanan tidak valid'); return; }
+  if (!status) { showToast('Pilih status pesanan terlebih dahulu'); return; }
+
   const btn = document.getElementById('btn-save-order');
   btn.disabled = true;
   btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke-dasharray="28" stroke-dashoffset="14"/></svg> Menyimpan…`;
 
   try {
-    const res = await fetch(`/api/orders/${id}`, {
+    const res = await fetch(`/api/orders/${encodeURIComponent(id)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status, notes })
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+      const body = await res.text();
+      let msg = 'Gagal menyimpan';
+      try { msg = JSON.parse(body).error || msg; } catch {}
+      throw new Error(msg);
+    }
     const updated = await res.json();
     // Update local cache
     const idx = _orders.findIndex(o => o.id === id);
     if (idx !== -1) _orders[idx] = { ..._orders[idx], ...updated };
-    // Re-render views that show orders
+    // Re-render semua yang menampilkan pesanan
     renderStats();
     renderDashOrders();
     renderPesanan(document.getElementById('pesanan-search').value);
     renderPelanggan();
     renderLaporan();
     closeOrderModal();
-    showToast('✓ Pesanan berhasil diperbarui');
+    showToast('✓ Status pesanan berhasil diperbarui');
   } catch (e) {
     showToast('Gagal menyimpan: ' + e.message);
   } finally {
@@ -1068,20 +1333,24 @@ async function saveOrder() {
   }
 }
 
-// ── Edit Product Modal ──
+// ══════════════════════════════════════════════════════
+// ── EDIT PRODUCT MODAL ──
+// ══════════════════════════════════════════════════════
 function openEditModal(id) {
   const p = _products.find(p => p.id === id);
   if (!p) return;
-  document.getElementById('edit-id').value       = p.id;
-  document.getElementById('edit-name').value     = p.name;
-  document.getElementById('edit-stock').value    = p.stock;
-  document.getElementById('edit-image').value    = p.image || '';
+  document.getElementById('edit-id').value    = p.id;
+  document.getElementById('edit-name').value  = p.name;
+  document.getElementById('edit-stock').value = p.stock;
+  document.getElementById('edit-image').value = p.image || '';
+  document.getElementById('edit-file-input').value = '';
+  document.getElementById('edit-upload-progress').style.display = 'none';
   // Set category select
   const sel = document.getElementById('edit-category');
   for (let i=0; i<sel.options.length; i++) {
     sel.options[i].selected = sel.options[i].value === p.category;
   }
-  previewImg(p.image || '');
+  previewImgById(p.image || '', 'edit-img-preview');
   document.getElementById('edit-modal').classList.add('open');
   document.getElementById('edit-name').focus();
 }
@@ -1094,12 +1363,6 @@ function handleBackdropClick(e) {
   if (e.target === document.getElementById('edit-modal')) closeEditModal();
 }
 
-function previewImg(url) {
-  const img = document.getElementById('img-preview');
-  img.src = url;
-  img.style.display = url ? '' : 'none';
-}
-
 async function saveProduct() {
   const id       = document.getElementById('edit-id').value;
   const name     = document.getElementById('edit-name').value.trim();
@@ -1107,7 +1370,7 @@ async function saveProduct() {
   const stock    = parseInt(document.getElementById('edit-stock').value, 10);
   const image    = document.getElementById('edit-image').value.trim();
 
-  if (!name)             { showToast('Nama produk tidak boleh kosong'); return; }
+  if (!name)                 { showToast('Nama produk tidak boleh kosong'); return; }
   if (isNaN(stock)||stock<0) { showToast('Stok harus berupa angka ≥ 0'); return; }
 
   const btn = document.getElementById('btn-save-prod');
@@ -1115,17 +1378,20 @@ async function saveProduct() {
   btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke-dasharray="28" stroke-dashoffset="14"/></svg> Menyimpan…`;
 
   try {
-    const res  = await fetch(`/api/products/${id}`, {
+    const res = await fetch(`/api/products/${encodeURIComponent(id)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, category, stock, image })
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+      const body = await res.text();
+      let msg = 'Gagal menyimpan';
+      try { msg = JSON.parse(body).error || msg; } catch {}
+      throw new Error(msg);
+    }
     const updated = await res.json();
-    // Update local cache
     const idx = _products.findIndex(p => p.id === id);
     if (idx !== -1) _products[idx] = { ..._products[idx], ...updated };
-    // Re-render everything that shows products
     renderStats();
     renderDashProducts();
     renderDashLowstock();
@@ -1150,7 +1416,7 @@ function showToast(msg) {
   _toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ── Spin animation for save button ──
+// ── Spin animation ──
 const _spinStyle = document.createElement('style');
 _spinStyle.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
 document.head.appendChild(_spinStyle);
