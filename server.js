@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const { getProducts, getProduct, addOrder, isSheetsConfigured } = require('./lib/sheets');
+const { getProducts, getProduct, addOrder, getOrders, isSheetsConfigured } = require('./lib/sheets');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -40,6 +40,17 @@ app.get('/api/products/:id', async (req, res) => {
     res.json(product);
   } catch (e) {
     res.status(500).json({ error: 'Gagal mengambil produk' });
+  }
+});
+
+// Daftar pesanan
+app.get('/api/orders', async (req, res) => {
+  try {
+    const orders = await getOrders();
+    res.json(orders);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal mengambil data pesanan' });
   }
 });
 
