@@ -1,4 +1,4 @@
-# SULAM Store — Agas Collection
+# Agas Collection
 
 Toko pakaian premium Indonesia. Express + Node.js backend, static HTML/CSS/JS frontend, Google Sheets sebagai database produk & pesanan.
 
