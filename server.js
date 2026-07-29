@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const { getProducts, getProduct, addOrder, getOrders, updateProduct, isSheetsConfigured } = require('./lib/sheets');
+const { getProducts, getProduct, addOrder, getOrders, updateProduct, updateOrder, isSheetsConfigured } = require('./lib/sheets');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -64,6 +64,19 @@ app.put('/api/products/:id', async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Gagal memperbarui produk' });
+  }
+});
+
+// Update pesanan (status + catatan)
+app.put('/api/orders/:id', async (req, res) => {
+  try {
+    const { status, notes } = req.body;
+    const updated = await updateOrder(req.params.id, { status, notes });
+    if (!updated) return res.status(404).json({ error: 'Pesanan tidak ditemukan' });
+    res.json(updated);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal memperbarui pesanan' });
   }
 });
 

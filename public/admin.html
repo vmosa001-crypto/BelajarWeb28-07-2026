@@ -203,6 +203,22 @@
     .empty   { text-align:center; padding:28px; color:var(--muted); font-size:.83rem; }
     .page-title { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; margin-bottom:18px; }
 
+    /* ─── Order Detail Modal ─── */
+    .modal-wide { max-width:560px; }
+    .order-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 20px; }
+    .detail-item { display:flex; flex-direction:column; gap:3px; }
+    .detail-label { font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+    .detail-value { font-size:.875rem; color:var(--text); font-weight:500; word-break:break-word; }
+    .detail-value.mono { font-family:monospace; color:var(--accent); font-weight:700; }
+    .order-divider { border:none; border-top:1px solid var(--border); margin:4px 0; grid-column:1/-1; }
+    .status-pills { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+    .status-pill { padding:6px 14px; border-radius:20px; font-size:.8rem; font-weight:600; border:2px solid transparent; cursor:pointer; transition:all .18s; }
+    .sp-pending  { background:var(--badge-amber-bg); color:var(--badge-amber); border-color:var(--badge-amber-bdr); }
+    .sp-diproses { background:var(--badge-blue-bg);  color:var(--badge-blue);  border-color:var(--badge-blue-bdr);  }
+    .sp-selesai  { background:var(--badge-green-bg); color:var(--badge-green); border-color:var(--badge-green-bdr); }
+    .status-pill.selected { box-shadow:0 0 0 2px currentColor; transform:scale(1.05); }
+    .status-pill:hover:not(.selected) { opacity:.8; }
+
     /* ─── Edit Modal ─── */
     .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:300; align-items:center; justify-content:center; padding:16px; }
     .modal-backdrop.open { display:flex; }
@@ -351,6 +367,88 @@
     <div class="modal-foot">
       <button class="btn-ghost" onclick="closeEditModal()">Batal</button>
       <button class="btn-save" id="btn-save-prod" onclick="saveProduct()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Simpan Perubahan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ORDER DETAIL MODAL ═══════════════ -->
+<div class="modal-backdrop" id="order-modal" onclick="handleOrderBackdrop(event)">
+  <div class="modal modal-wide">
+    <div class="modal-head">
+      <div>
+        <h3>Detail Pesanan</h3>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:2px" id="order-modal-id"></div>
+      </div>
+      <button class="modal-close" onclick="closeOrderModal()" title="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="order-modal-id-val">
+
+      <!-- Info pelanggan (read-only) -->
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px;">Informasi Pelanggan</div>
+      <div class="order-detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">Nama</span>
+          <span class="detail-value" id="od-name">—</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Tanggal Pesan</span>
+          <span class="detail-value" id="od-date">—</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Email</span>
+          <span class="detail-value" id="od-email">—</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Telepon</span>
+          <span class="detail-value" id="od-phone">—</span>
+        </div>
+        <div class="detail-item" style="grid-column:1/-1">
+          <span class="detail-label">Alamat Lengkap</span>
+          <span class="detail-value" id="od-address">—</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Kota</span>
+          <span class="detail-value" id="od-city">—</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Total Pembayaran</span>
+          <span class="detail-value" id="od-total" style="color:var(--accent);font-weight:700">—</span>
+        </div>
+        <div class="detail-item" style="grid-column:1/-1">
+          <span class="detail-label">Produk Dipesan</span>
+          <span class="detail-value" id="od-items">—</span>
+        </div>
+      </div>
+
+      <hr class="order-divider" style="margin:14px 0">
+
+      <!-- Editable: Status -->
+      <div class="form-field">
+        <label>Status Pesanan</label>
+        <div class="status-pills">
+          <button class="status-pill sp-pending"  data-status="Pending"  onclick="selectStatus('Pending')">⏳ Pending</button>
+          <button class="status-pill sp-diproses" data-status="Diproses" onclick="selectStatus('Diproses')">🔄 Diproses</button>
+          <button class="status-pill sp-selesai"  data-status="Selesai"  onclick="selectStatus('Selesai')">✓ Selesai</button>
+        </div>
+      </div>
+
+      <!-- Editable: Catatan / Deskripsi -->
+      <div class="form-field">
+        <label>Catatan / Deskripsi Pesanan</label>
+        <textarea id="od-notes" rows="3" placeholder="Tambahkan catatan internal untuk pesanan ini…"
+          style="padding:9px 12px;border:1px solid var(--border);border-radius:9px;font-size:.875rem;background:var(--input-bg);color:var(--text);outline:none;resize:vertical;font-family:inherit;width:100%;transition:border-color .18s"
+          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeOrderModal()">Tutup</button>
+      <button class="btn-save" id="btn-save-order" onclick="saveOrder()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         Simpan Perubahan
       </button>
@@ -547,8 +645,8 @@
         </div>
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>ID Pesanan</th><th>Pelanggan</th><th>Kota</th><th>Produk</th><th>Total</th><th>Status</th><th>Tanggal</th></tr></thead>
-            <tbody id="pesanan-body"><tr><td colspan="7" class="loading">Memuat…</td></tr></tbody>
+            <thead><tr><th>ID Pesanan</th><th>Pelanggan</th><th>Kota</th><th>Produk</th><th>Total</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+            <tbody id="pesanan-body"><tr><td colspan="8" class="loading">Memuat…</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -659,14 +757,6 @@
 <script>
 // ── Data cache ──
 let _products = [], _orders = [];
-const MOCK_ORDERS = [
-  {id:'ORD-2847',name:'Siti Nurhaliza',email:'siti@email.com',phone:'081234567890',city:'Mataram',items:'Kemeja Batik Modern',total:485000,status:'Selesai',date:'2025-01-12'},
-  {id:'ORD-2846',name:'Budi Santoso',  email:'budi@email.com',phone:'082345678901',city:'Lombok Tengah',items:'Dress Tenun Ikat',total:1250000,status:'Pending', date:'2025-01-12'},
-  {id:'ORD-2845',name:'Dewi Lestari',  email:'dewi@email.com',phone:'083456789012',city:'Praya',items:'Jaket Bomber Klasik',total:890000,status:'Diproses',date:'2025-01-11'},
-  {id:'ORD-2844',name:'Ahmad Fauzi',   email:'ahmad@email.com',phone:'084567890123',city:'Selong',items:'Celana Kulot Premium',total:420000,status:'Selesai',date:'2025-01-11'},
-  {id:'ORD-2843',name:'Rina Wijaya',   email:'rina@email.com',phone:'085678901234',city:'Mataram',items:'Blouse Linen Kasual',total:365000,status:'Selesai',date:'2025-01-10'},
-  {id:'ORD-2842',name:'Hendra Gunawan',email:'hendra@email.com',phone:'086789012345',city:'Gerung',items:'Kemeja Batik Modern',total:485000,status:'Pending',date:'2025-01-10'},
-];
 
 // ── Helpers ──
 const fmtRp = n => 'Rp ' + Number(n).toLocaleString('id-ID');
@@ -739,7 +829,7 @@ async function loadAll() {
   ]);
 
   _products = prodRes.length ? prodRes : [];
-  _orders   = ordRes.length  ? ordRes  : MOCK_ORDERS;
+  _orders   = Array.isArray(ordRes) ? ordRes : [];
 
   renderStats();
   renderDashOrders();
@@ -830,8 +920,9 @@ function renderPesanan(filter='') {
       <td class="cell-bold">${fmtRp(o.total)}</td>
       <td>${badge(o.status)}</td>
       <td class="cell-muted">${fmtDate(o.date)}</td>
+      <td><button class="btn-edit" onclick="openOrderModal('${o.id}')">🔍 Detail</button></td>
     </tr>`).join('');
-  document.getElementById('pesanan-body').innerHTML = rows || '<tr><td colspan="7" class="empty">Tidak ditemukan</td></tr>';
+  document.getElementById('pesanan-body').innerHTML = rows || '<tr><td colspan="8" class="empty">Tidak ditemukan</td></tr>';
 }
 document.getElementById('pesanan-search').addEventListener('input', e => renderPesanan(e.target.value));
 
@@ -899,6 +990,83 @@ document.getElementById('global-search').addEventListener('input', e => {
   if (active==='pesanan')   { document.getElementById('pesanan-search').value=v; renderPesanan(v); }
   if (active==='pelanggan') { document.getElementById('pelanggan-search').value=v; renderPelanggan(v); }
 });
+
+// ── Order Detail Modal ──
+let _selectedStatus = '';
+
+function openOrderModal(id) {
+  const o = _orders.find(o => o.id === id);
+  if (!o) return;
+  _selectedStatus = o.status;
+  document.getElementById('order-modal-id').textContent      = o.id;
+  document.getElementById('order-modal-id-val').value        = o.id;
+  document.getElementById('od-name').textContent             = o.name    || '—';
+  document.getElementById('od-date').textContent             = fmtDate(o.date);
+  document.getElementById('od-email').textContent            = o.email   || '—';
+  document.getElementById('od-phone').textContent            = o.phone   || '—';
+  document.getElementById('od-city').textContent             = o.city    || '—';
+  document.getElementById('od-total').textContent            = fmtRp(o.total);
+  document.getElementById('od-items').textContent            = parseItems(o.items);
+  document.getElementById('od-notes').value                  = o.notes   || '';
+  // Address: combine address + city
+  const addr = [o.address, o.city].filter(Boolean).join(', ');
+  document.getElementById('od-address').textContent          = addr || '—';
+  // Status pills
+  selectStatus(o.status);
+  document.getElementById('order-modal').classList.add('open');
+  document.getElementById('od-notes').focus();
+}
+
+function closeOrderModal() {
+  document.getElementById('order-modal').classList.remove('open');
+}
+
+function handleOrderBackdrop(e) {
+  if (e.target === document.getElementById('order-modal')) closeOrderModal();
+}
+
+function selectStatus(s) {
+  _selectedStatus = s;
+  document.querySelectorAll('.status-pill').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.status === s);
+  });
+}
+
+async function saveOrder() {
+  const id     = document.getElementById('order-modal-id-val').value;
+  const status = _selectedStatus;
+  const notes  = document.getElementById('od-notes').value.trim();
+
+  const btn = document.getElementById('btn-save-order');
+  btn.disabled = true;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke-dasharray="28" stroke-dashoffset="14"/></svg> Menyimpan…`;
+
+  try {
+    const res = await fetch(`/api/orders/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, notes })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const updated = await res.json();
+    // Update local cache
+    const idx = _orders.findIndex(o => o.id === id);
+    if (idx !== -1) _orders[idx] = { ..._orders[idx], ...updated };
+    // Re-render views that show orders
+    renderStats();
+    renderDashOrders();
+    renderPesanan(document.getElementById('pesanan-search').value);
+    renderPelanggan();
+    renderLaporan();
+    closeOrderModal();
+    showToast('✓ Pesanan berhasil diperbarui');
+  } catch (e) {
+    showToast('Gagal menyimpan: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Simpan Perubahan`;
+  }
+}
 
 // ── Edit Product Modal ──
 function openEditModal(id) {
