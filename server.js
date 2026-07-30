@@ -94,10 +94,13 @@ app.get('/auth/google',
 
 // Callback setelah login Google
 app.get('/auth/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: '/login.html?error=oauth_failed',
-    successRedirect: '/admin.html'
-  })
+  passport.authenticate('google', { failureRedirect: '/login.html?error=oauth_failed' }),
+  (req, res) => {
+    // Redirect ke halaman yang dituju sebelum login, atau homepage
+    const returnTo = req.session.returnTo || '/';
+    delete req.session.returnTo;
+    res.redirect(returnTo);
+  }
 );
 
 // Logout
@@ -130,6 +133,8 @@ app.use((req, res, next) => {
   if (!req.isAuthenticated()) {
     if (path_.startsWith('/api/'))
       return res.status(401).json({ error: 'Silakan login terlebih dahulu' });
+    // Simpan halaman tujuan agar bisa redirect balik setelah login
+    req.session.returnTo = req.originalUrl;
     return res.redirect('/login.html');
   }
   next();
