@@ -39,6 +39,9 @@ const upload = multer({
   }
 });
 
+// ── Trust proxy (Railway / Heroku / Nginx — wajib agar secure cookie bekerja di HTTPS) ──
+app.set('trust proxy', 1);
+
 // ── Middleware dasar ─────────────────────────────────────────────────────────
 app.use(express.json());
 
@@ -48,7 +51,8 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: 'auto',   // 'auto' = secure jika HTTPS, tidak secure jika HTTP (dev lokal)
+    sameSite: 'lax',  // aman untuk OAuth redirect flow
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 hari
   }
 }));
@@ -110,22 +114,13 @@ app.get('/auth/me', (req, res) => {
   res.json(req.user);
 });
 
-// ── Static files publik (toko) ────────────────────────────────────────────────
-// admin.html dilindungi: tidak di-serve via static, tapi lewat route di bawah
-app.use(express.static(path.join(__dirname, 'public'), {
-  index: 'index.html',
-  setHeaders: (res, filePath) => {
-    // Blokir akses langsung ke admin.html via static
-    if (filePath.endsWith('admin.html')) {
-      res.status(403);
-    }
-  }
-}));
-
-// ── Serve admin.html (hanya untuk yang sudah login) ──────────────────────────
+// ── Serve admin.html (HARUS sebelum express.static agar requireAuth jalan duluan) ──
 app.get('/admin.html', requireAuth, (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
+
+// ── Static files publik (toko) — admin.html sudah ditangani route di atas ────
+app.use(express.static(path.join(__dirname, 'public'), { index: 'index.html' }));
 
 // ── Status database ──────────────────────────────────────────────────────────
 app.get('/api/status', (_req, res) => {
