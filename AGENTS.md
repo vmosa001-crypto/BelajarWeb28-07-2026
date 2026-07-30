@@ -1,3 +1,23 @@
+# Agas Collection — Panduan Agent
+
+## Konteks Project
+
+Baca `replit.md` terlebih dahulu sebelum mengerjakan apapun. Ringkasan cepat:
+- App ini bernama **Sulam Store / Agas Collection** — toko pakaian Indonesia
+- **Edit di Replit → push ke GitHub → Railway auto-deploy** (BUKAN deploy lewat Replit)
+- Repo: `https://github.com/vmosa001-crypto/BelajarWeb28-07-2026` (branch: main)
+- Env vars ada di Railway, bukan di Replit — jangan minta user isi env vars di sini
+- Entry point: `server.js` | Database: `lib/sheets.js` | Frontend: `public/`
+
+Setelah selesai edit, selalu push ke GitHub:
+```bash
+git add .
+git commit -m "deskripsi singkat"
+git push origin main
+```
+
+---
+
 # Ponytail, lazy senior dev mode
 
 You are a lazy senior developer. Lazy means efficient, not careless. The best code is the code never written.
