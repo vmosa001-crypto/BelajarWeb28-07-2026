@@ -1,8 +1,11 @@
 require('dotenv').config();
-const express = require('express');
-const path    = require('path');
-const fs      = require('fs');
-const multer  = require('multer');
+const express  = require('express');
+const path     = require('path');
+const fs       = require('fs');
+const multer   = require('multer');
+const session  = require('express-session');
+const passport = require('passport');
+const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 
 const {
   getProducts, getProduct, addProduct,
@@ -29,30 +32,114 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // maks 5 MB
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     const ok = /^image\/(jpeg|png|webp|gif)$/.test(file.mimetype);
     cb(ok ? null : new Error('Hanya file gambar yang diperbolehkan'), ok);
   }
 });
 
+// ── Middleware dasar ─────────────────────────────────────────────────────────
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+
+// ── Session ──────────────────────────────────────────────────────────────────
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'agas-secret-fallback',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 hari
+  }
+}));
+
+// ── Passport ─────────────────────────────────────────────────────────────────
+passport.use(new GoogleStrategy({
+  clientID:     process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL:  process.env.GOOGLE_CALLBACK_URL
+}, (_accessToken, _refreshToken, profile, done) => {
+  // Izinkan semua akun Google yang berhasil login
+  const user = {
+    id:     profile.id,
+    name:   profile.displayName,
+    email:  profile.emails?.[0]?.value || '',
+    photo:  profile.photos?.[0]?.value || ''
+  };
+  return done(null, user);
+}));
+
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// ── Middleware: wajib login ──────────────────────────────────────────────────
+function requireAuth(req, res, next) {
+  if (req.isAuthenticated()) return next();
+  if (req.accepts('html')) return res.redirect('/login.html');
+  res.status(401).json({ error: 'Unauthorized' });
+}
+
+// ── Auth routes ──────────────────────────────────────────────────────────────
+// Mulai OAuth Google
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+// Callback setelah login Google
+app.get('/auth/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: '/login.html?error=oauth_failed',
+    successRedirect: '/admin.html'
+  })
+);
+
+// Logout
+app.get('/auth/logout', (req, res) => {
+  req.logout(err => {
+    if (err) console.error('Logout error:', err);
+    res.redirect('/login.html');
+  });
+});
+
+// Info user yang sedang login (untuk client-side check)
+app.get('/auth/me', (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  res.json(req.user);
+});
+
+// ── Static files publik (toko) ────────────────────────────────────────────────
+// admin.html dilindungi: tidak di-serve via static, tapi lewat route di bawah
+app.use(express.static(path.join(__dirname, 'public'), {
+  index: 'index.html',
+  setHeaders: (res, filePath) => {
+    // Blokir akses langsung ke admin.html via static
+    if (filePath.endsWith('admin.html')) {
+      res.status(403);
+    }
+  }
+}));
+
+// ── Serve admin.html (hanya untuk yang sudah login) ──────────────────────────
+app.get('/admin.html', requireAuth, (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
 
 // ── Status database ──────────────────────────────────────────────────────────
 app.get('/api/status', (_req, res) => {
   res.json({ sheetsConnected: isSheetsConfigured() });
 });
 
-// ── Upload gambar → kembalikan URL ───────────────────────────────────────────
-app.post('/api/upload', upload.single('image'), (req, res) => {
+// ── Upload gambar (protected) ─────────────────────────────────────────────────
+app.post('/api/upload', requireAuth, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Tidak ada file yang diupload' });
   const url = `/uploads/${req.file.filename}`;
-  console.log('Image uploaded:', url);
   res.json({ url });
 });
 
-// ── Daftar produk (dengan filter kategori & search) ──────────────────────────
+// ── Daftar produk (public) ───────────────────────────────────────────────────
 app.get('/api/products', async (req, res) => {
   try {
     const { category, search, featured } = req.query;
@@ -70,7 +157,7 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-// ── Detail satu produk ───────────────────────────────────────────────────────
+// ── Detail produk (public) ───────────────────────────────────────────────────
 app.get('/api/products/:id', async (req, res) => {
   try {
     const product = await getProduct(req.params.id);
@@ -81,8 +168,8 @@ app.get('/api/products/:id', async (req, res) => {
   }
 });
 
-// ── Tambah produk baru ───────────────────────────────────────────────────────
-app.post('/api/products', async (req, res) => {
+// ── Tambah produk (protected) ─────────────────────────────────────────────────
+app.post('/api/products', requireAuth, async (req, res) => {
   try {
     const { name, category, description, price, stock, featured, sizes, image } = req.body;
     if (!name)  return res.status(400).json({ error: 'Nama produk tidak boleh kosong' });
@@ -95,8 +182,8 @@ app.post('/api/products', async (req, res) => {
   }
 });
 
-// ── Update produk (nama, kategori, harga, stok, gambar, dll) ─────────────────
-app.put('/api/products/:id', async (req, res) => {
+// ── Update produk (protected) ─────────────────────────────────────────────────
+app.put('/api/products/:id', requireAuth, async (req, res) => {
   try {
     const { name, category, description, price, stock, image, featured, sizes } = req.body;
     const updated = await updateProduct(req.params.id, { name, category, description, price, stock, image, featured, sizes });
@@ -108,8 +195,8 @@ app.put('/api/products/:id', async (req, res) => {
   }
 });
 
-// ── Daftar pesanan ───────────────────────────────────────────────────────────
-app.get('/api/orders', async (_req, res) => {
+// ── Daftar pesanan (protected) ────────────────────────────────────────────────
+app.get('/api/orders', requireAuth, async (_req, res) => {
   try {
     const orders = await getOrders();
     res.json(orders);
@@ -119,8 +206,8 @@ app.get('/api/orders', async (_req, res) => {
   }
 });
 
-// ── Update pesanan (status + catatan) ────────────────────────────────────────
-app.put('/api/orders/:id', async (req, res) => {
+// ── Update pesanan (protected) ────────────────────────────────────────────────
+app.put('/api/orders/:id', requireAuth, async (req, res) => {
   try {
     const { status, notes } = req.body;
     const updated = await updateOrder(req.params.id, { status, notes });
@@ -132,7 +219,7 @@ app.put('/api/orders/:id', async (req, res) => {
   }
 });
 
-// ── Buat pesanan ─────────────────────────────────────────────────────────────
+// ── Buat pesanan (public — pelanggan bisa checkout) ───────────────────────────
 app.post('/api/orders', async (req, res) => {
   try {
     const { name, email, phone, address, city, items, total } = req.body;
@@ -149,4 +236,5 @@ app.post('/api/orders', async (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`SULAM Store berjalan di port ${PORT}`);
   console.log(`Google Sheets: ${isSheetsConfigured() ? 'Terhubung' : 'Belum dikonfigurasi (pakai mock data)'}`);
+  console.log(`Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? 'Dikonfigurasi' : 'BELUM dikonfigurasi'}`);
 });

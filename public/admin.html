@@ -601,8 +601,14 @@
     </button>
   </nav>
   <div class="sidebar-user">
-    <div class="avatar">AD</div>
-    <div class="user-info"><p>Admin</p><span>admin@agas.id</span></div>
+    <div id="sb-avatar" class="avatar">AD</div>
+    <div class="user-info">
+      <p id="sb-name">Admin</p>
+      <span id="sb-email">admin@agas.id</span>
+    </div>
+    <a href="/auth/logout" id="logout-btn" title="Keluar" style="margin-left:auto;flex-shrink:0;padding:5px;border-radius:7px;color:var(--muted);transition:color .15s,background .15s;display:flex;align-items:center;" onmouseover="this.style.color='var(--accent)';this.style.background='var(--bg3)'" onmouseout="this.style.color='var(--muted)';this.style.background='transparent'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </a>
   </div>
 </aside>
 
@@ -631,7 +637,10 @@
       <a href="/" class="icon-btn" title="Ke toko">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </a>
-      <div class="avatar">AD</div>
+      <a href="/auth/logout" title="Keluar" class="icon-btn" style="color:var(--muted)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </a>
+      <div id="tb-avatar" class="avatar">AD</div>
     </div>
   </header>
 
@@ -1432,6 +1441,34 @@ const _spinStyle = document.createElement('style');
 _spinStyle.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
 document.head.appendChild(_spinStyle);
 
+// ── Auth: cek login & isi info user ──────────────────────────────────────────
+async function checkAuth() {
+  try {
+    const res = await fetch('/auth/me');
+    if (!res.ok) { window.location.href = '/login.html'; return; }
+    const user = await res.json();
+    // Sidebar
+    const sbAvatar = document.getElementById('sb-avatar');
+    const sbName   = document.getElementById('sb-name');
+    const sbEmail  = document.getElementById('sb-email');
+    const tbAvatar = document.getElementById('tb-avatar');
+    if (sbName)  sbName.textContent  = user.name  || 'Admin';
+    if (sbEmail) sbEmail.textContent = user.email || '';
+    if (user.photo) {
+      const img = `<img src="${user.photo}" alt="${user.name}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">`;
+      if (sbAvatar) sbAvatar.outerHTML = img;
+      if (tbAvatar) tbAvatar.outerHTML = img;
+    } else {
+      const initials = (user.name || 'AD').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+      if (sbAvatar) sbAvatar.textContent = initials;
+      if (tbAvatar) tbAvatar.textContent = initials;
+    }
+  } catch {
+    window.location.href = '/login.html';
+  }
+}
+
+checkAuth();
 loadAll();
 </script>
 </body>
