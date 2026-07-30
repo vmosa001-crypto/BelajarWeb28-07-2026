@@ -6,28 +6,35 @@
   <title>Keranjang — Agas Collection</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script>(function(){var t=localStorage.getItem('store-theme');if(t)document.documentElement.setAttribute('data-theme',t);}());</script>
+  <script>(function(){var t=localStorage.getItem('store-theme');if(t)document.documentElement.setAttribute('data-theme',t);}());</script>
 </head>
 <body>
 
-<div class="promo-banner">Gratis ongkir untuk pembelian di atas <span>Rp 500.000</span> 🎉</div>
+<div class="promo-banner">Gratis ongkir untuk pembelian di atas <span>Rp 500.000</span> — Berlaku hari ini</div>
 
 <header>
   <div class="container">
     <div class="header-inner">
-      <a href="/" class="logo">Agas<span>Collection</span><small style="display:block;font-size:0.5em;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);font-weight:400">Lombok</small></a>
+      <a href="/" class="logo">Agas<span>Collection</span></a>
       <nav>
         <a href="/">Beranda</a>
         <a href="/products.html">Koleksi</a>
       </nav>
       <div class="header-actions">
         <a href="/cart.html" class="hdr-cart" title="Keranjang">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 11H4L5 9z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 11H4L5 9z"/></svg>
           <span class="cart-count">0</span>
         </a>
       </div>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
+  <nav class="mobile-nav" id="mobile-nav">
+    <a href="/">Beranda</a>
+    <a href="/products.html">Koleksi</a>
+  </nav>
 </header>
 
 <main>
@@ -36,17 +43,25 @@
       <p class="breadcrumb"><a href="/">Beranda</a> <span>/</span> Keranjang</p>
       <h1>Keranjang Belanja</h1>
     </div>
-
     <div id="cart-content"></div>
   </div>
 </main>
 
-<footer style="background:var(--text);color:#888;text-align:center;padding:24px">
-  <p style="font-size:.85rem">© 2026 Agas Collection — <a href="/" style="color:var(--accent)">Beranda</a></p>
+<footer>
+  <div class="container">
+    <div class="footer-bottom" style="border:none;padding-top:0">
+      <span>© 2026 Agas Collection</span>
+      <a href="/products.html" style="color:rgba(255,255,255,.4);font-size:.78rem">← Lanjut Belanja</a>
+    </div>
+  </div>
 </footer>
 
 <script type="module">
 import { Cart, fmt, toast, cartReady } from '/js/main.js';
+
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('mobile-nav').classList.toggle('open');
+});
 
 const SHIPPING = 25000;
 const FREE_SHIPPING_MIN = 500000;
@@ -58,9 +73,11 @@ function render() {
   if (!items.length) {
     container.innerHTML = `
       <div class="cart-empty">
-        <div style="font-size:4rem;margin-bottom:16px">🛍</div>
-        <h2>Keranjang Masih Kosong</h2>
-        <p>Yuk, temukan pakaian favoritmu di koleksi kami.</p>
+        <div class="cart-empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 11H4L5 9z"/></svg>
+        </div>
+        <h2>Keranjang Kosong</h2>
+        <p>Temukan pakaian favoritmu di koleksi kami.</p>
         <a href="/products.html" class="btn btn-primary btn-lg">Lihat Koleksi</a>
       </div>`;
     return;
@@ -69,6 +86,7 @@ function render() {
   const subtotal = Cart.total();
   const shipping = subtotal >= FREE_SHIPPING_MIN ? 0 : SHIPPING;
   const total = subtotal + shipping;
+  const remaining = FREE_SHIPPING_MIN - subtotal;
 
   container.innerHTML = `
     <div class="cart-layout">
@@ -81,20 +99,22 @@ function render() {
               </a>
               <div>
                 <p class="cart-item-name">${item.name}</p>
-                <p class="cart-item-meta">Ukuran: ${item.size} · Warna: ${item.color}</p>
-                <div class="qty-control" style="margin-bottom:10px">
+                <p class="cart-item-meta">Ukuran: ${item.size} &nbsp;·&nbsp; Warna: ${item.color}</p>
+                <div class="qty-control" style="margin-bottom:12px">
                   <button class="qty-btn" onclick="changeQty('${item.key}', ${item.qty - 1})">−</button>
                   <span class="qty-val">${item.qty}</span>
                   <button class="qty-btn" onclick="changeQty('${item.key}', ${item.qty + 1})">+</button>
                 </div>
                 <p class="cart-item-price">${fmt(item.price * item.qty)}</p>
               </div>
-              <button class="remove-btn" onclick="removeItem('${item.key}')" title="Hapus">✕</button>
+              <button class="remove-btn" onclick="removeItem('${item.key}')" title="Hapus">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
             </div>
           `).join('')}
         </div>
-        <div style="margin-top:24px">
-          <button onclick="clearAll()" class="btn btn-outline btn-sm">Kosongkan Keranjang</button>
+        <div style="margin-top:20px;display:flex;justify-content:flex-end">
+          <button onclick="clearAll()" class="btn btn-outline btn-sm" style="color:var(--text-muted);border-color:var(--border)">Kosongkan Keranjang</button>
         </div>
       </div>
 
@@ -102,24 +122,27 @@ function render() {
         <h3>Ringkasan Pesanan</h3>
         ${items.map(i => `
           <div class="summary-row">
-            <span>${i.name} ×${i.qty}</span>
-            <span>${fmt(i.price * i.qty)}</span>
+            <span style="color:var(--text-muted);max-width:180px;white-space:normal">${i.name} <small style="color:var(--text-muted)">×${i.qty}</small></span>
+            <span style="white-space:nowrap">${fmt(i.price * i.qty)}</span>
           </div>`).join('')}
         <div class="summary-row">
           <span>Subtotal</span><span>${fmt(subtotal)}</span>
         </div>
         <div class="summary-row">
-          <span>Ongkir</span>
-          <span>${shipping === 0 ? '<span style="color:var(--success)">GRATIS</span>' : fmt(shipping)}</span>
+          <span>Ongkos Kirim</span>
+          <span>${shipping === 0 ? '<span style="color:var(--success);font-weight:600">GRATIS</span>' : fmt(shipping)}</span>
         </div>
         <div class="summary-row summary-total">
-          <span>Total</span><span>${fmt(total)}</span>
+          <span>Total</span><span style="color:var(--accent)">${fmt(total)}</span>
         </div>
+        ${subtotal < FREE_SHIPPING_MIN ? `
+          <div style="margin-top:12px;padding:12px 14px;background:var(--bg2);border-radius:3px;font-size:.78rem;color:var(--text-muted);text-align:center">
+            Tambah <strong style="color:var(--text)">${fmt(remaining)}</strong> lagi untuk gratis ongkir
+          </div>` : ''}
         <a href="/checkout.html" class="btn btn-primary btn-lg btn-block" style="margin-top:20px">
-          Lanjut ke Checkout →
+          Lanjut ke Checkout
         </a>
         <a href="/products.html" class="btn btn-outline btn-sm btn-block" style="margin-top:10px">Lanjut Belanja</a>
-        ${subtotal < FREE_SHIPPING_MIN ? `<p style="font-size:.8rem;color:var(--text-muted);text-align:center;margin-top:12px">Tambah <strong>${fmt(FREE_SHIPPING_MIN - subtotal)}</strong> lagi untuk gratis ongkir</p>` : ''}
       </div>
     </div>`;
 }
@@ -128,7 +151,6 @@ window.changeQty = (key, qty) => { Cart.updateQty(key, qty); render(); };
 window.removeItem = (key) => { Cart.remove(key); toast('Item dihapus dari keranjang'); render(); };
 window.clearAll = () => { if (confirm('Kosongkan semua keranjang?')) { Cart.clear(); render(); } };
 
-// Tunggu cart key selesai di-resolve sebelum render (fix: item hilang karena key async)
 cartReady.then(render);
 </script>
 </body>

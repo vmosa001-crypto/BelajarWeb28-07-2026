@@ -6,56 +6,74 @@
   <title>Detail Produk — Agas Collection</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script>(function(){var t=localStorage.getItem('store-theme');if(t)document.documentElement.setAttribute('data-theme',t);}());</script>
+  <script>(function(){var t=localStorage.getItem('store-theme');if(t)document.documentElement.setAttribute('data-theme',t);}());</script>
 </head>
 <body>
 
-<div class="promo-banner">Gratis ongkir untuk pembelian di atas <span>Rp 500.000</span> 🎉</div>
+<div class="promo-banner">Gratis ongkir untuk pembelian di atas <span>Rp 500.000</span> — Berlaku hari ini</div>
 
 <header>
   <div class="container">
     <div class="header-inner">
-      <a href="/" class="logo">Agas<span>Collection</span><small style="display:block;font-size:0.5em;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);font-weight:400">Lombok</small></a>
+      <a href="/" class="logo">Agas<span>Collection</span></a>
       <nav>
         <a href="/">Beranda</a>
         <a href="/products.html">Koleksi</a>
       </nav>
       <div class="header-actions">
         <a href="/cart.html" class="hdr-cart" title="Keranjang">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 11H4L5 9z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 11H4L5 9z"/></svg>
           <span class="cart-count">0</span>
         </a>
       </div>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
+  <nav class="mobile-nav" id="mobile-nav">
+    <a href="/">Beranda</a>
+    <a href="/products.html">Koleksi</a>
+  </nav>
 </header>
 
 <main>
   <div class="container">
-    <p class="breadcrumb" style="padding:24px 0 0">
+    <p class="breadcrumb" style="padding:28px 0 0">
       <a href="/">Beranda</a> <span>/</span>
       <a href="/products.html">Koleksi</a> <span>/</span>
       <span id="bc-name">Produk</span>
     </p>
 
     <div class="product-detail" id="product-detail">
-      <!-- diisi JS -->
-      <div class="skeleton" style="aspect-ratio:3/4;border-radius:12px"></div>
+      <div class="skeleton" style="aspect-ratio:3/4;border-radius:4px"></div>
       <div style="display:flex;flex-direction:column;gap:20px">
-        <div class="skeleton" style="height:40px;border-radius:8px"></div>
-        <div class="skeleton" style="height:80px;border-radius:8px"></div>
-        <div class="skeleton" style="height:120px;border-radius:8px"></div>
+        <div class="skeleton" style="height:36px;width:60%"></div>
+        <div class="skeleton" style="height:52px;width:80%"></div>
+        <div class="skeleton" style="height:100px"></div>
+        <div class="skeleton" style="height:54px;width:50%"></div>
+        <div class="skeleton" style="height:54px"></div>
       </div>
     </div>
   </div>
 </main>
 
-<footer style="background:var(--text);color:#888;text-align:center;padding:24px">
-  <p style="font-size:.85rem">© 2026 Agas Collection — <a href="/" style="color:var(--accent)">Beranda</a></p>
+<footer>
+  <div class="container">
+    <div class="footer-bottom" style="border:none;padding-top:0">
+      <span>© 2026 Agas Collection</span>
+      <a href="/products.html" style="color:rgba(255,255,255,.4);font-size:.78rem">← Kembali ke Koleksi</a>
+    </div>
+  </div>
 </footer>
 
 <script type="module">
 import { Cart, fmt, toast, apiFetch } from '/js/main.js';
+
+// Hamburger
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('mobile-nav').classList.toggle('open');
+});
 
 const id = new URLSearchParams(location.search).get('id');
 if (!id) location.href = '/products.html';
@@ -69,8 +87,18 @@ async function loadProduct() {
     document.title = `${p.name} — Agas Collection`;
     document.getElementById('bc-name').textContent = p.name;
 
-    // Color swatches — map nama warna ke hex sederhana
-    const colorMap = { 'Hitam':'#1a1a1a','Putih':'#f5f5f5','Biru Navy':'#1B3A6B','Merah Marun':'#7B1B2A','Abu-abu':'#888','Krem':'#F5E6C8','Olive':'#6B7C45','Camel':'#C19A6B','Cokelat':'#7B4F2E','Champagne':'#EDD9A3','Biru Indigo':'#2D3A8C','Sage Green':'#87A878','Dusty Pink':'#D4A5A5','Dusty Rose':'#C78B8B' };
+    const colorMap = {
+      'Hitam':'#1a1a1a','Putih':'#f5f5f5','Biru Navy':'#1B3A6B','Merah Marun':'#7B1B2A',
+      'Abu-abu':'#888','Krem':'#F5E6C8','Olive':'#6B7C45','Camel':'#C19A6B',
+      'Cokelat':'#7B4F2E','Champagne':'#EDD9A3','Biru Indigo':'#2D3A8C',
+      'Sage Green':'#87A878','Dusty Pink':'#D4A5A5','Dusty Rose':'#C78B8B'
+    };
+
+    const stockInfo = p.stock > 10
+      ? `<span style="color:var(--success)">Stok tersedia: ${p.stock} pcs</span>`
+      : p.stock > 0
+      ? `<span style="color:#E67E22">Stok terbatas: ${p.stock} pcs</span>`
+      : `<span style="color:var(--danger)">Stok habis</span>`;
 
     container.innerHTML = `
       <div class="product-detail-img">
@@ -79,9 +107,10 @@ async function loadProduct() {
       <div class="product-detail-info">
         <div>
           <p class="product-category">${p.category}</p>
-          <h1 style="font-size:2rem;margin-bottom:12px">${p.name}</h1>
+          <h1 style="font-family:'Cormorant Garamond',serif;font-size:2.1rem;font-weight:600;margin-bottom:14px;line-height:1.15">${p.name}</h1>
           <p class="product-detail-price">${fmt(p.price)}</p>
         </div>
+
         <p class="product-detail-desc">${p.description}</p>
 
         <div>
@@ -96,7 +125,7 @@ async function loadProduct() {
           <div class="color-options">
             ${p.colors.map(c => `<button class="color-btn" data-color="${c}" title="${c}" style="background:${colorMap[c]||'#ccc'}"></button>`).join('')}
           </div>
-          <p id="selected-color" style="font-size:.85rem;color:var(--text-muted);margin-top:8px">&nbsp;</p>
+          <p id="selected-color" style="font-size:.82rem;color:var(--text-muted);margin-top:10px;min-height:1.2em">&nbsp;</p>
         </div>
 
         <div>
@@ -108,19 +137,19 @@ async function loadProduct() {
           </div>
         </div>
 
-        <div style="display:flex;gap:12px;margin-top:8px">
-          <button class="btn btn-primary btn-lg" id="add-cart" style="flex:1">Tambah ke Keranjang</button>
-          <a href="/cart.html" class="btn btn-accent btn-lg" style="flex:1">Beli Sekarang</a>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-lg" id="add-cart" style="flex:1;min-width:160px">Tambah ke Keranjang</button>
+          <a href="/cart.html" class="btn btn-outline btn-lg" style="flex:1;min-width:120px">Keranjang</a>
         </div>
 
-        <div style="background:var(--bg2);border-radius:12px;padding:16px;font-size:.85rem;color:var(--text-muted)">
-          <p>✅ Stok tersedia: <strong style="color:var(--text)">${p.stock} pcs</strong></p>
-          <p style="margin-top:6px">📦 Estimasi pengiriman 2–4 hari kerja</p>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:18px 20px;font-size:.82rem;color:var(--text-muted);display:flex;flex-direction:column;gap:8px">
+          <p>${stockInfo}</p>
+          <p>Estimasi pengiriman 2–4 hari kerja</p>
+          <p>Gratis ongkir di atas Rp 500.000</p>
         </div>
       </div>
     `;
 
-    // Size selection
     container.querySelectorAll('.size-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         container.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
@@ -129,7 +158,6 @@ async function loadProduct() {
       });
     });
 
-    // Color selection
     container.querySelectorAll('.color-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         container.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
@@ -139,7 +167,6 @@ async function loadProduct() {
       });
     });
 
-    // Qty control
     document.getElementById('qty-dec').addEventListener('click', () => {
       if (qty > 1) { qty--; document.getElementById('qty-val').textContent = qty; }
     });
@@ -147,16 +174,15 @@ async function loadProduct() {
       if (qty < p.stock) { qty++; document.getElementById('qty-val').textContent = qty; }
     });
 
-    // Add to cart
     document.getElementById('add-cart').addEventListener('click', () => {
       if (!selectedSize) return toast('Pilih ukuran terlebih dahulu', 'error');
       if (!selectedColor) return toast('Pilih warna terlebih dahulu', 'error');
       Cart.add(p, selectedSize, selectedColor, qty);
-      toast(`${p.name} ditambahkan ke keranjang ✓`, 'success');
+      toast(`${p.name} ditambahkan ke keranjang`, 'success');
     });
 
   } catch {
-    container.innerHTML = '<p style="color:var(--text-muted);padding:40px">Produk tidak ditemukan.</p>';
+    container.innerHTML = '<p style="color:var(--text-muted);padding:60px 0">Produk tidak ditemukan.</p>';
   }
 }
 
