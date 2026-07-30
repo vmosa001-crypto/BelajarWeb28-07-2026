@@ -114,12 +114,28 @@ app.get('/auth/me', (req, res) => {
   res.json(req.user);
 });
 
-// ── Serve admin.html (HARUS sebelum express.static agar requireAuth jalan duluan) ──
-app.get('/admin.html', requireAuth, (_req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+// ── Middleware global: semua halaman wajib login ─────────────────────────────
+// Pengecualian: login.html, /auth/*, favicon, dan CSS (untuk render login page)
+app.use((req, res, next) => {
+  const path_ = req.path;
+
+  // Izinkan tanpa login
+  const publicPaths    = ['/login.html', '/favicon.svg', '/favicon.ico'];
+  const publicPrefixes = ['/auth/', '/css/'];
+
+  if (publicPaths.includes(path_))                       return next();
+  if (publicPrefixes.some(p => path_.startsWith(p)))    return next();
+
+  // Semua yang lain wajib login
+  if (!req.isAuthenticated()) {
+    if (path_.startsWith('/api/'))
+      return res.status(401).json({ error: 'Silakan login terlebih dahulu' });
+    return res.redirect('/login.html');
+  }
+  next();
 });
 
-// ── Static files publik (toko) — admin.html sudah ditangani route di atas ────
+// ── Static files (sudah dilindungi middleware di atas) ────────────────────────
 app.use(express.static(path.join(__dirname, 'public'), { index: 'index.html' }));
 
 // ── Status database ──────────────────────────────────────────────────────────
