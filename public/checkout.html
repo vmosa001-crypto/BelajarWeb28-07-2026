@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — Agas Collection</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <a href="/" class="logo">Agas<span>Collection</span><small style="display:block;font-size:0.5em;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);font-weight:400">Lombok</small></a>
+      <nav>
+        <a href="/">Beranda</a>
+        <a href="/products.html">Koleksi</a>
+      </nav>
+      <div class="header-actions">
+        <a href="/cart.html" class="btn-cart">🛍 Keranjang <span class="cart-count">0</span></a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="page-title">
+      <p class="breadcrumb"><a href="/">Beranda</a> <span>/</span> <a href="/cart.html">Keranjang</a> <span>/</span> Checkout</p>
+      <h1>Checkout</h1>
+    </div>
+
+    <div id="checkout-content"></div>
+  </div>
+</main>
+
+<footer style="background:var(--text);color:#888;text-align:center;padding:24px">
+  <p style="font-size:.85rem">© 2026 Agas Collection — <a href="/" style="color:var(--accent)">Beranda</a></p>
+</footer>
+
+<script type="module">
+import { Cart, fmt, toast } from '/js/main.js';
+
+const SHIPPING = 25000;
+const FREE_SHIPPING_MIN = 500000;
+
+function renderEmpty() {
+  document.getElementById('checkout-content').innerHTML = `
+    <div class="cart-empty">
+      <p>Keranjang kosong.</p>
+      <a href="/products.html" class="btn btn-primary">Lihat Koleksi</a>
+    </div>`;
+}
+
+function renderSuccess(orderId) {
+  Cart.clear();
+  document.getElementById('checkout-content').innerHTML = `
+    <div class="success-page">
+      <div class="success-icon">🎉</div>
+      <h2>Pesanan Berhasil!</h2>
+      <p>Terima kasih telah berbelanja di Agas Collection. Kami akan segera memproses pesananmu.</p>
+      <div class="order-id-box">
+        <p>Nomor Pesanan</p>
+        <strong>${orderId}</strong>
+      </div>
+      <br>
+      <a href="/products.html" class="btn btn-primary btn-lg">Lanjut Belanja</a>
+    </div>`;
+}
+
+function render() {
+  const items = Cart.get();
+  if (!items.length) return renderEmpty();
+
+  const subtotal = Cart.total();
+  const shipping = subtotal >= FREE_SHIPPING_MIN ? 0 : SHIPPING;
+  const total = subtotal + shipping;
+
+  document.getElementById('checkout-content').innerHTML = `
+    <div class="checkout-layout">
+      <div>
+        <form id="checkout-form">
+          <div class="form-section">
+            <h3>📍 Informasi Pengiriman</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Nama Lengkap *</label>
+                <input type="text" name="name" required placeholder="Nama penerima">
+              </div>
+              <div class="form-group">
+                <label>No. WhatsApp *</label>
+                <input type="tel" name="phone" required placeholder="08xxxxxxxxxx">
+              </div>
+              <div class="form-group">
+                <label>Email *</label>
+                <input type="email" name="email" required placeholder="email@kamu.com">
+              </div>
+              <div class="form-group">
+                <label>Kota / Kabupaten *</label>
+                <input type="text" name="city" required placeholder="Jakarta Selatan">
+              </div>
+              <div class="form-group form-full">
+                <label>Alamat Lengkap *</label>
+                <textarea name="address" required placeholder="Jalan, nomor rumah, RT/RW, kelurahan, kecamatan, kode pos"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>💳 Metode Pembayaran</h3>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              ${['Transfer Bank BCA','Transfer Bank Mandiri','DANA / GoPay / OVO','COD (Bayar di Tempat)'].map((m,i) => `
+                <label style="display:flex;align-items:center;gap:12px;padding:14px 18px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer">
+                  <input type="radio" name="payment" value="${m}" ${i===0?'checked':''} required>
+                  <span style="font-weight:500">${m}</span>
+                </label>`).join('')}
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>📝 Catatan (Opsional)</h3>
+            <div class="form-group">
+              <textarea name="note" placeholder="Catatan khusus untuk penjual..."></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-block" id="submit-btn">
+            Buat Pesanan — ${fmt(total)}
+          </button>
+        </form>
+      </div>
+
+      <div class="order-summary" style="position:sticky;top:100px">
+        <h3>Pesanan Kamu (${items.length} item)</h3>
+        ${items.map(i => `
+          <div class="summary-row">
+            <span style="display:flex;align-items:center;gap:10px">
+              <img src="${i.image}" style="width:40px;height:50px;object-fit:cover;border-radius:6px">
+              <span>${i.name}<br><small style="color:var(--text-muted)">${i.size} · ${i.color} ×${i.qty}</small></span>
+            </span>
+            <span style="white-space:nowrap">${fmt(i.price * i.qty)}</span>
+          </div>`).join('')}
+        <div class="summary-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
+        <div class="summary-row">
+          <span>Ongkir</span>
+          <span>${shipping === 0 ? '<span style="color:var(--success)">GRATIS</span>' : fmt(shipping)}</span>
+        </div>
+        <div class="summary-row summary-total"><span>Total</span><span>${fmt(total)}</span></div>
+      </div>
+    </div>`;
+
+  document.getElementById('checkout-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Memproses...';
+
+    const fd = new FormData(e.target);
+    const body = {
+      name: fd.get('name'), email: fd.get('email'), phone: fd.get('phone'),
+      address: fd.get('address'), city: fd.get('city'),
+      payment: fd.get('payment'), note: fd.get('note'),
+      items, total
+    };
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (data.success) renderSuccess(data.orderId);
+      else throw new Error(data.error);
+    } catch (err) {
+      toast('Gagal membuat pesanan. Coba lagi.', 'error');
+      btn.disabled = false;
+      btn.textContent = `Buat Pesanan — ${fmt(total)}`;
+    }
+  });
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Admin — Agas Collection</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --bg: #faf8f5;
+      --card: #ffffff;
+      --border: #e8e4dd;
+      --text: #2d2520;
+      --text2: #4a3f35;
+      --muted: #8b7963;
+      --accent: #c2714f;
+      --accent2: #a85d3f;
+      --shadow: 0 4px 24px rgba(0,0,0,.08);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,.12);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(194,113,79,.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 90%, rgba(194,113,79,.06) 0%, transparent 55%),
+        #faf8f5;
+    }
+
+    .login-wrap {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* Brand */
+    .brand {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .brand-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.1rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -.01em;
+    }
+    .brand-logo span { color: var(--accent); }
+    .brand-sub {
+      display: block;
+      font-size: .62rem;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+      margin-top: 4px;
+    }
+    .brand-tagline {
+      margin-top: 10px;
+      font-size: .8rem;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* Card */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 40px 36px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .card-desc {
+      font-size: .8rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 28px;
+      line-height: 1.55;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      color: var(--muted);
+      font-size: .72rem;
+      letter-spacing: .05em;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Google button */
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 13px 20px;
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: .88rem;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      transition: all .2s;
+      text-decoration: none;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .btn-google:hover {
+      border-color: #c5c5c5;
+      box-shadow: 0 3px 12px rgba(0,0,0,.1);
+      transform: translateY(-1px);
+    }
+    .btn-google:active { transform: translateY(0); }
+
+    .btn-google svg {
+      flex-shrink: 0;
+    }
+
+    /* Alert error */
+    .alert-error {
+      display: none;
+      background: #fff5f5;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: .78rem;
+      color: #b91c1c;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .alert-error.show { display: block; }
+
+    /* Footer note */
+    .footer-note {
+      text-align: center;
+      margin-top: 24px;
+      font-size: .72rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .footer-note a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .footer-note a:hover { text-decoration: underline; }
+
+    /* Ornament lines */
+    .ornament {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 28px;
+    }
+    .ornament span {
+      display: block;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--accent);
+      opacity: .25;
+    }
+    .ornament span:nth-child(1) { width: 28px; }
+    .ornament span:nth-child(2) { width: 8px; }
+    .ornament span:nth-child(3) { width: 4px; }
+
+    @media (max-width: 480px) {
+      .card { padding: 28px 20px; }
+      .brand-logo { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="brand">
+      <div class="brand-logo">Agas<span>Collection</span></div>
+      <small class="brand-sub">Lombok · Pakaian Premium</small>
+      <p class="brand-tagline">Pakaian premium dengan sentuhan budaya Indonesia</p>
+    </div>
+
+    <div class="card">
+      <div class="ornament">
+        <span></span><span></span><span></span>
+      </div>
+      <h1 class="card-title">Masuk ke Agas Collection</h1>
+      <p class="card-desc">Login dengan akun Google kamu untuk mulai berbelanja.</p>
+
+      <div class="alert-error" id="error-alert"></div>
+
+      <div class="divider">Lanjutkan dengan</div>
+
+      <a href="/auth/google" class="btn-google">
+        <!-- Google G logo SVG -->
+        <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          <path fill="none" d="M0 0h48v48H0z"/>
+        </svg>
+        Masuk dengan Google
+      </a>
+    </div>
+
+    <p class="footer-note">
+      Masuk dengan akun Google kamu untuk mengakses toko.
+    </p>
+  </div>
+
+  <script>
+    // Tampilkan pesan error dari query param
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error')) {
+      const el = document.getElementById('error-alert');
+      const msg = {
+        'unauthorized': 'Akun Google kamu tidak memiliki akses ke dashboard ini.',
+        'oauth_failed': 'Login dengan Google gagal. Silakan coba lagi.',
+      }[params.get('error')] || 'Terjadi kesalahan. Silakan coba lagi.';
+      el.textContent = msg;
+      el.classList.add('show');
+    }
+    // Jika sudah login, redirect ke admin
+    fetch('/auth/me').then(r => r.json()).then(u => {
+      if (u && u.id) window.location.href = '/admin.html';
+    }).catch(() => {});
+  </script>
+</body>
+</html>

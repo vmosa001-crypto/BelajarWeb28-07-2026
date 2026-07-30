@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keranjang — Agas Collection</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+
+<div class="promo-banner">Gratis ongkir untuk pembelian di atas <span>Rp 500.000</span> 🎉</div>
+
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <a href="/" class="logo">Agas<span>Collection</span><small style="display:block;font-size:0.5em;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);font-weight:400">Lombok</small></a>
+      <nav>
+        <a href="/">Beranda</a>
+        <a href="/products.html">Koleksi</a>
+      </nav>
+      <div class="header-actions">
+        <a href="/cart.html" class="btn-cart">🛍 Keranjang <span class="cart-count">0</span></a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="page-title">
+      <p class="breadcrumb"><a href="/">Beranda</a> <span>/</span> Keranjang</p>
+      <h1>Keranjang Belanja</h1>
+    </div>
+
+    <div id="cart-content"></div>
+  </div>
+</main>
+
+<footer style="background:var(--text);color:#888;text-align:center;padding:24px">
+  <p style="font-size:.85rem">© 2026 Agas Collection — <a href="/" style="color:var(--accent)">Beranda</a></p>
+</footer>
+
+<script type="module">
+import { Cart, fmt, toast } from '/js/main.js';
+
+const SHIPPING = 25000;
+const FREE_SHIPPING_MIN = 500000;
+
+function render() {
+  const items = Cart.get();
+  const container = document.getElementById('cart-content');
+
+  if (!items.length) {
+    container.innerHTML = `
+      <div class="cart-empty">
+        <div style="font-size:4rem;margin-bottom:16px">🛍</div>
+        <h2>Keranjang Masih Kosong</h2>
+        <p>Yuk, temukan pakaian favoritmu di koleksi kami.</p>
+        <a href="/products.html" class="btn btn-primary btn-lg">Lihat Koleksi</a>
+      </div>`;
+    return;
+  }
+
+  const subtotal = Cart.total();
+  const shipping = subtotal >= FREE_SHIPPING_MIN ? 0 : SHIPPING;
+  const total = subtotal + shipping;
+
+  container.innerHTML = `
+    <div class="cart-layout">
+      <div>
+        <div class="cart-items">
+          ${items.map(item => `
+            <div class="cart-item">
+              <a href="/product.html?id=${item.id}" class="cart-item-img">
+                <img src="${item.image}" alt="${item.name}">
+              </a>
+              <div>
+                <p class="cart-item-name">${item.name}</p>
+                <p class="cart-item-meta">Ukuran: ${item.size} · Warna: ${item.color}</p>
+                <div class="qty-control" style="margin-bottom:10px">
+                  <button class="qty-btn" onclick="changeQty('${item.key}', ${item.qty - 1})">−</button>
+                  <span class="qty-val">${item.qty}</span>
+                  <button class="qty-btn" onclick="changeQty('${item.key}', ${item.qty + 1})">+</button>
+                </div>
+                <p class="cart-item-price">${fmt(item.price * item.qty)}</p>
+              </div>
+              <button class="remove-btn" onclick="removeItem('${item.key}')" title="Hapus">✕</button>
+            </div>
+          `).join('')}
+        </div>
+        <div style="margin-top:24px">
+          <button onclick="clearAll()" class="btn btn-outline btn-sm">Kosongkan Keranjang</button>
+        </div>
+      </div>
+
+      <div class="order-summary">
+        <h3>Ringkasan Pesanan</h3>
+        ${items.map(i => `
+          <div class="summary-row">
+            <span>${i.name} ×${i.qty}</span>
+            <span>${fmt(i.price * i.qty)}</span>
+          </div>`).join('')}
+        <div class="summary-row">
+          <span>Subtotal</span><span>${fmt(subtotal)}</span>
+        </div>
+        <div class="summary-row">
+          <span>Ongkir</span>
+          <span>${shipping === 0 ? '<span style="color:var(--success)">GRATIS</span>' : fmt(shipping)}</span>
+        </div>
+        <div class="summary-row summary-total">
+          <span>Total</span><span>${fmt(total)}</span>
+        </div>
+        <a href="/checkout.html" class="btn btn-primary btn-lg btn-block" style="margin-top:20px">
+          Lanjut ke Checkout →
+        </a>
+        <a href="/products.html" class="btn btn-outline btn-sm btn-block" style="margin-top:10px">Lanjut Belanja</a>
+        ${subtotal < FREE_SHIPPING_MIN ? `<p style="font-size:.8rem;color:var(--text-muted);text-align:center;margin-top:12px">Tambah <strong>${fmt(FREE_SHIPPING_MIN - subtotal)}</strong> lagi untuk gratis ongkir</p>` : ''}
+      </div>
+    </div>`;
+}
+
+window.changeQty = (key, qty) => { Cart.updateQty(key, qty); render(); };
+window.removeItem = (key) => { Cart.remove(key); toast('Item dihapus dari keranjang'); render(); };
+window.clearAll = () => { if (confirm('Kosongkan semua keranjang?')) { Cart.clear(); render(); } };
+
+render();
+</script>
+</body>
+</html>
