@@ -44,7 +44,7 @@
 </footer>
 
 <script type="module">
-import { Cart, fmt, toast, getUser } from '/js/main.js';
+import { Cart, fmt, toast, getUser, cartReady } from '/js/main.js';
 
 const SHIPPING = 25000;
 const FREE_SHIPPING_MIN = 500000;
@@ -198,7 +198,7 @@ function render() {
   });
 }
 
-render();
+cartReady.then(render);
 </script>
 </body>
 </html>
