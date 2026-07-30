@@ -9,7 +9,7 @@ const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 
 const {
   getProducts, getProduct, addProduct,
-  addOrder, getOrders,
+  addOrder, getOrders, getOrdersByEmail,
   updateProduct, updateOrder,
   isSheetsConfigured
 } = require('./lib/sheets');
@@ -150,6 +150,17 @@ app.use((req, res, next) => {
 
 // ── Static files (sudah dilindungi middleware di atas) ────────────────────────
 app.use(express.static(path.join(__dirname, 'public'), { index: 'index.html' }));
+
+// ── Pesanan milik user yang sedang login ─────────────────────────────────────
+app.get('/api/my-orders', requireAuth, async (req, res) => {
+  try {
+    const orders = await getOrdersByEmail(req.user.email);
+    res.json(orders);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal mengambil pesanan' });
+  }
+});
 
 // ── Status database ──────────────────────────────────────────────────────────
 app.get('/api/status', (_req, res) => {

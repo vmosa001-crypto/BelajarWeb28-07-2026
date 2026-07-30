@@ -40,7 +40,7 @@
 </footer>
 
 <script type="module">
-import { Cart, fmt, toast } from '/js/main.js';
+import { Cart, fmt, toast, getUser } from '/js/main.js';
 
 const SHIPPING = 25000;
 const FREE_SHIPPING_MIN = 500000;
@@ -64,8 +64,10 @@ function renderSuccess(orderId) {
         <p>Nomor Pesanan</p>
         <strong>${orderId}</strong>
       </div>
-      <br>
-      <a href="/products.html" class="btn btn-primary btn-lg">Lanjut Belanja</a>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:8px">
+        <a href="/dashboard.html" class="btn btn-primary btn-lg">Lacak Pesanan</a>
+        <a href="/products.html" class="btn btn-outline btn-lg">Lanjut Belanja</a>
+      </div>
     </div>`;
 }
 
@@ -149,6 +151,17 @@ function render() {
         <div class="summary-row summary-total"><span>Total</span><span>${fmt(total)}</span></div>
       </div>
     </div>`;
+
+  // Pre-isi nama & email dari akun Google
+  getUser().then(user => {
+    if (!user) return;
+    const form = document.getElementById('checkout-form');
+    if (!form) return;
+    const nameInput  = form.querySelector('[name="name"]');
+    const emailInput = form.querySelector('[name="email"]');
+    if (nameInput  && !nameInput.value)  nameInput.value  = user.name;
+    if (emailInput && !emailInput.value) emailInput.value = user.email;
+  });
 
   document.getElementById('checkout-form').addEventListener('submit', async e => {
     e.preventDefault();
