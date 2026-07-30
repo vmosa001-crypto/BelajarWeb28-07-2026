@@ -67,6 +67,19 @@ function statusBadge(status) {
   return `<span class="status-badge" style="background:${s.bg};color:${s.color}">${s.icon} ${s.label}</span>`;
 }
 
+function parseItems(raw) {
+  if (!raw) return '-';
+  try {
+    const arr = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (!Array.isArray(arr)) return String(raw);
+    return arr.map(i =>
+      `<span class="order-item-chip">${i.name} <em>${i.size} · ${i.color}</em> ×${i.qty}</span>`
+    ).join('');
+  } catch {
+    return String(raw); // fallback: teks biasa (format lama)
+  }
+}
+
 function formatDate(dateStr) {
   if (!dateStr) return '-';
   const d = new Date(dateStr);
@@ -154,7 +167,7 @@ async function load() {
                 ${statusBadge(o.status)}
               </div>
               <div class="order-card-body">
-                <div class="order-items-preview">${o.items || '-'}</div>
+                <div class="order-items-preview">${parseItems(o.items)}</div>
                 ${o.notes ? `<p class="order-notes">📝 ${o.notes}</p>` : ''}
               </div>
               <div class="order-card-footer">

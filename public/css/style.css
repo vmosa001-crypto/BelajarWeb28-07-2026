@@ -363,7 +363,9 @@ footer { background: var(--text); color: #B0B0B0; padding: 56px 0 32px; margin-t
 .order-id { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; }
 .order-date { font-size: .82rem; color: var(--text-muted); margin-top: 2px; }
 .order-card-body { padding: 16px 24px; }
-.order-items-preview { font-size: .9rem; color: var(--text); }
+.order-items-preview { font-size: .9rem; color: var(--text); display: flex; flex-wrap: wrap; gap: 8px; }
+.order-item-chip { display: inline-flex; flex-direction: column; background: var(--bg2); border-radius: 8px; padding: 6px 10px; font-size: .82rem; line-height: 1.4; }
+.order-item-chip em { font-style: normal; color: var(--text-muted); font-size: .78rem; }
 .order-notes { font-size: .82rem; color: var(--text-muted); margin-top: 8px; }
 .order-card-footer {
   display: flex; align-items: center; justify-content: space-between;
