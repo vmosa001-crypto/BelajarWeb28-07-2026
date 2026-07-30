@@ -3,8 +3,8 @@ const express  = require('express');
 const path     = require('path');
 const fs       = require('fs');
 const multer   = require('multer');
-const session  = require('express-session');
-const passport = require('passport');
+const cookieSession = require('cookie-session');
+const passport      = require('passport');
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 
 const {
@@ -45,17 +45,25 @@ app.set('trust proxy', 1);
 // ── Middleware dasar ─────────────────────────────────────────────────────────
 app.use(express.json());
 
-// ── Session ──────────────────────────────────────────────────────────────────
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'agas-secret-fallback',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: 'auto',   // 'auto' = secure jika HTTPS, tidak secure jika HTTP (dev lokal)
-    sameSite: 'lax',  // aman untuk OAuth redirect flow
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 hari
-  }
+// ── Cookie Session (tersimpan di browser, tidak hilang saat server restart) ──
+app.use(cookieSession({
+  name:   'agas_session',
+  keys:   [process.env.SESSION_SECRET || 'agas-secret-fallback'],
+  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 hari — tidak perlu login ulang selama sebulan
+  secure: 'auto',   // otomatis secure di HTTPS (Railway), tidak secure di localhost
+  sameSite: 'lax'
 }));
+
+// ── Kompatibilitas cookie-session dengan Passport ────────────────────────────
+app.use((req, _res, next) => {
+  if (req.session && !req.session.regenerate) {
+    req.session.regenerate = (cb) => { cb(); };
+  }
+  if (req.session && !req.session.save) {
+    req.session.save = (cb) => { cb(); };
+  }
+  next();
+});
 
 // ── Passport ─────────────────────────────────────────────────────────────────
 passport.use(new GoogleStrategy({
